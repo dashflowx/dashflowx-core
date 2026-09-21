@@ -1,6 +1,6 @@
 # This tree is the only Dashflow-core source
 
-- **Package:** `@dashflowx/core` `1.0.0` (new npm account; first publish)
+- **Package:** `@dashflowx/core` `3.0.0`
 - **Origin:** `https://github.com/dashflowx/dashflowx-core.git`
 - **Sibling folder `../dashflow-core`:** empty remote `https://github.com/dashflowx/dashflow-core.git` — pointer only, no `src/`
 

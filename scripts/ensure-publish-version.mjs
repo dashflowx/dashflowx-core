@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * npmjs / GitHub Packages: if the package is not on the registry, set version to 1.0.0
- * so the next `npm publish --access public` creates it.
+ * If the package is not on the registry, set version to 1.0.0 (first create).
+ * If this version was already published, bump past the highest published version.
  *
  * Usage: node scripts/ensure-publish-version.mjs <dir> <registry>
  */
@@ -16,18 +16,14 @@ const pkgPath = join(dir, 'package.json');
 const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
 const name = pkg.name;
 
-function view() {
+function npmJson(args) {
   try {
-    const out = execFileSync(
-      'npm',
-      ['view', name, 'version', '--registry', registry, '--loglevel', 'error'],
-      {
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'pipe'],
-        env: process.env,
-      }
-    ).trim();
-    return out && out !== 'undefined' ? out : '';
+    const out = execFileSync('npm', [...args, '--registry', registry, '--loglevel', 'error'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: process.env,
+    }).trim();
+    return out;
   } catch (e) {
     const err = `${e.stderr || ''}${e.stdout || ''}${e.message || ''}`;
     if (
@@ -42,20 +38,65 @@ function view() {
   }
 }
 
-const existing = view();
-if (!existing) {
-  pkg.version = FIRST;
+function parseVer(v) {
+  const [a, b, c] = String(v)
+    .split('.')
+    .map((n) => parseInt(n, 10) || 0);
+  return [a, b, c];
+}
+
+function cmp(x, y) {
+  const a = parseVer(x);
+  const b = parseVer(y);
+  for (let i = 0; i < 3; i += 1) {
+    if (a[i] !== b[i]) return a[i] - b[i];
+  }
+  return 0;
+}
+
+function bumpPatch(v) {
+  const [a, b, c] = parseVer(v);
+  return `${a}.${b}.${c + 1}`;
+}
+
+function publishedVersions() {
+  const raw = npmJson(['view', name, 'versions', '--json']);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.map(String);
+    if (parsed) return [String(parsed)];
+  } catch {
+    return raw ? [raw] : [];
+  }
+  return [];
+}
+
+function writeVersion(next, reason) {
+  pkg.version = next;
   writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+  console.log(reason);
+}
+
+const published = publishedVersions();
+if (published.length === 0) {
+  writeVersion(FIRST, `${name} not found on ${registry} — creating ${name}@${FIRST}`);
+  process.exit(0);
+}
+
+const latest = published.reduce((m, v) => (cmp(v, m) > 0 ? v : m), published[0]);
+if (!published.includes(pkg.version)) {
   console.log(
-    `${name} not found on ${registry} — creating ${name}@${FIRST} (first npm publish)`
+    `${name} on ${registry}: latest ${latest} (${published.length} versions). Publishing ${pkg.version}.`
   );
   process.exit(0);
 }
 
-console.log(`${name} already on ${registry} as ${existing}; this run uses ${pkg.version}`);
-if (pkg.version === existing) {
-  console.error(
-    `Refusing to publish ${name}@${pkg.version} — that version is already on the registry. Bump package.json.`
-  );
-  process.exit(1);
-}
+let next = latest;
+do {
+  next = bumpPatch(next);
+} while (published.includes(next));
+writeVersion(
+  next,
+  `${name}@${pkg.version} already on ${registry} (latest ${latest}) — publishing ${next} instead`
+);
