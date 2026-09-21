@@ -2,7 +2,7 @@
 # X05 gate: dry_run defaults to true. Uncheck it and tick publish_free / publish_pro.
 #
 # Repo secrets:
-#   NPM_TOKEN          npmjs granular token (bypass 2FA) with publish on @dashflowx
+#   NPM_TOKEN          npmjs granular token (bypass 2FA) with publish on @dashflow
 #   GH_PACKAGES_TOKEN  optional PAT (write:packages) if this repo is not under the dashflowx org
 #                      (GITHUB_TOKEN is enough when the repo lives at github.com/dashflowx/…)
 
@@ -16,11 +16,11 @@ on:
         type: boolean
         default: true
       publish_free:
-        description: Publish @dashflowx/core to npmjs (public)
+        description: Publish @dashflow/core to npmjs (public)
         type: boolean
         default: false
       publish_pro:
-        description: Publish @dashflowx/core-pro to GitHub Packages (private)
+        description: Publish @dashflow/core-pro to GitHub Packages (private)
         type: boolean
         default: false
       dist_tag:
@@ -57,6 +57,19 @@ jobs:
       - run: yarn lint
       - run: yarn build
 
+      - name: First publish is 1.0.0 if the package is missing
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          node scripts/ensure-publish-version.mjs . https://registry.npmjs.org
+          umask 077
+          cat > "$RUNNER_TEMP/github.npmrc" <<EOF
+          @dashflow:registry=https://npm.pkg.github.com
+          //npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
+          EOF
+          NPM_CONFIG_USERCONFIG="$RUNNER_TEMP/github.npmrc" \
+            node scripts/ensure-publish-version.mjs core-pro https://npm.pkg.github.com
+
       - name: Inspect free tarball (no src/pro)
         run: node scripts/pack-inspect.mjs .
 
@@ -67,8 +80,8 @@ jobs:
         if: ${{ inputs.dry_run }}
         run: |
           echo "dry_run=true — not uploading. Re-run with dry_run unchecked and publish_free/publish_pro ticked."
-          echo "Free package: @dashflowx/core"
-          echo "Pro package:  @dashflowx/core-pro → GitHub Packages only"
+          echo "Free package: @dashflow/core@$(node -p "require('./package.json').version")"
+          echo "Pro package:  @dashflow/core-pro@$(node -p "require('./core-pro/package.json').version") → GitHub Packages only"
 
       - name: Require NPM_TOKEN for free publish
         if: ${{ !inputs.dry_run && inputs.publish_free }}
@@ -80,17 +93,22 @@ jobs:
             exit 1
           fi
 
-      - name: Publish @dashflowx/core to npmjs
+      - name: Publish @dashflow/core to npmjs
         if: ${{ !inputs.dry_run && inputs.publish_free }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          set -euo pipefail
           umask 077
           cat > "$RUNNER_TEMP/npmjs.npmrc" <<EOF
           //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
           registry=https://registry.npmjs.org/
+          always-auth=true
           EOF
-          echo "Publishing @dashflowx/core to https://registry.npmjs.org (tag ${{ inputs.dist_tag }})"
+          NPM_CONFIG_USERCONFIG="$RUNNER_TEMP/npmjs.npmrc" \
+            node scripts/ensure-publish-version.mjs . https://registry.npmjs.org
+          VER="$(node -p "require('./package.json').version")"
+          echo "Publishing @dashflow/core@${VER} to https://registry.npmjs.org (creates the package if it does not exist)"
           npm publish --userconfig "$RUNNER_TEMP/npmjs.npmrc" --access public --tag "${{ inputs.dist_tag }}" --ignore-scripts --provenance
 
       - name: Require GitHub Packages auth for Pro
@@ -98,12 +116,12 @@ jobs:
         env:
           GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
         run: |
-          if [ "${{ github.repository_owner }}" != "dashflowx" ] && [ -z "$GH_PACKAGES_TOKEN" ]; then
-            echo "::error::@dashflowx/core-pro must publish as the dashflowx GitHub org. Transfer this repo to dashflowx, or set secret GH_PACKAGES_TOKEN (classic PAT: write:packages, SSO-authorized for dashflowx)."
+          if [ "${{ github.repository_owner }}" != "dashflow" ] && [ "${{ github.repository_owner }}" != "dashflowx" ] && [ -z "$GH_PACKAGES_TOKEN" ]; then
+            echo "::error::@dashflow/core-pro on GitHub Packages needs a GitHub owner named dashflow (scope match), or secret GH_PACKAGES_TOKEN with write:packages on that owner."
             exit 1
           fi
 
-      - name: Publish @dashflowx/core-pro to GitHub Packages
+      - name: Publish @dashflow/core-pro to GitHub Packages
         if: ${{ !inputs.dry_run && inputs.publish_pro }}
         working-directory: core-pro
         env:
@@ -111,21 +129,21 @@ jobs:
         run: |
           umask 077
           cat > "$RUNNER_TEMP/github.npmrc" <<EOF
-          @dashflowx:registry=https://npm.pkg.github.com
+          @dashflow:registry=https://npm.pkg.github.com
           //npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
           EOF
-          echo "Publishing @dashflowx/core-pro to https://npm.pkg.github.com"
+          echo "Publishing @dashflow/core-pro to https://npm.pkg.github.com"
           npm publish --userconfig "$RUNNER_TEMP/github.npmrc" --ignore-scripts
 
       - name: Verify free package on npmjs
         if: ${{ !inputs.dry_run && inputs.publish_free }}
-        run: npm view @dashflowx/core version
+        run: npm view @dashflow/core version
 
       - name: Confirm Pro is not on public npmjs
         if: ${{ !inputs.dry_run && inputs.publish_pro }}
         run: |
-          if npm view @dashflowx/core-pro version >/dev/null 2>&1; then
-            echo "::error::@dashflowx/core-pro must not exist on registry.npmjs.org"
+          if npm view @dashflow/core-pro version >/dev/null 2>&1; then
+            echo "::error::@dashflow/core-pro must not exist on registry.npmjs.org"
             exit 1
           fi
           echo "Pro is not listed on public npmjs (expected)."

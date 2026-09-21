@@ -15,7 +15,7 @@ A flexible and fully functional badge component that supports both React and Nex
 
 ### Basic Badge
 ```tsx
-import { Badge } from '@dashflowx/core';
+import { Badge } from '@dashflow/core';
 
 export default function MyPage() {
   return (
