@@ -2,13 +2,13 @@ import { format } from 'date-fns';
 
 import { cn } from '@/lib/utils';
 import { CalendarIcon } from 'lucide-react';
-import { Button } from '../Button';
+import { Button } from '../../components/Button';
 import { Calendar } from '../Calendar';
 import {
   PopoverComp as Popover,
   PopoverContent,
   PopoverTrigger,
-} from '../Popover';
+} from '../../components/Popover';
 
 interface iDatePicker {
   mode?: 'single' | 'multiple' | 'range';

@@ -1,3 +1,16 @@
+/* eslint-disable react-refresh/only-export-components -- barrel file */
+export {
+  CORE_REGISTRY,
+  assertUniqueRegistryIds,
+  editorPalette,
+  isProEntry,
+} from '../registry';
+export type {
+  ComponentRegistry,
+  RegistryEntry,
+  RegistryTier,
+} from '../registry';
+
 export {
   Accordion,
   AccordionBasic,
@@ -58,80 +71,11 @@ export {
   BreadcrumbSeparator,
 } from './Breadcrumb';
 
-export { Calendar } from './Calendar';
-
 export { Card } from './Card';
-
-export {
-  Carousel,
-  CarouselComp,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-  type CarouselApi,
-} from './Carousel';
 
 export { Checkbox, CheckboxComp } from './Checkbox';
 
-export {
-  Collapsible,
-  CollapsibleComp,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from './Collapsible';
-
-export {
-  Command,
-  CommandComp,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
-} from './Command';
-
 export { ComponentCard } from './ComponentCard';
-
-export {
-  ContextMenu,
-  SimpleContextMenu,
-} from './ContextMenu';
-
-export type { ContextMenuItemType } from './ContextMenu/utils';
-export {
-  parseArrayProp as parseContextMenuArrayProp,
-  getVariantClasses as getContextMenuVariantClasses,
-  getThemeClasses as getContextMenuThemeClasses,
-  getSubMenuClasses as getContextMenuSubMenuClasses,
-  isItemDisabled as isContextMenuItemDisabled,
-  createMenuItem as createContextMenuItem,
-  createLabelItem as createContextMenuLabelItem,
-  createSeparatorItem as createContextMenuSeparatorItem,
-  createSubMenuItem as createContextMenuSubMenuItem,
-  createRadioGroup as createContextMenuRadioGroup,
-  createCheckboxItem as createContextMenuCheckboxItem,
-} from './ContextMenu/utils';
-
-export type { DropdownMenuItemType } from './DropDownMenu/utils';
-export {
-  parseArrayProp,
-  getVariantClasses,
-  getThemeClasses,
-  getSubMenuClasses,
-  getBackgroundClasses,
-  isItemDisabled,
-  createMenuItem,
-  createLabelItem,
-  createSeparatorItem,
-  createGroupItem,
-  createSubMenuItem,
-} from './DropDownMenu/utils';
-
-export { DatePicker } from './DatePicker';
 
 export {
   Dialog,
@@ -151,25 +95,6 @@ export {
   Drawer,
   DrawerComp,
 } from './Drawer';
-
-export {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuComp,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from './DropDownMenu';
 
 export {
   Form,
@@ -195,68 +120,11 @@ export {
 
 export { Grid } from './Grid';
 
-export {
-  HoverCard,
-  HoverCardComp,
-  HoverCardContent,
-  HoverCardTrigger,
-} from './HoverCard';
-
 export { Input, Input2 } from './Input';
-
-export {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSeparator,
-  InputOTPSlot,
-  InputOtpComp,
-} from './InputOTP';
 
 export { Label } from './Label';
 
 export { IconUnOrderList, List, OrderList, UnOrderList } from './List';
-
-export {
-  Menubar,
-  DynamicMenubar,
-  MenubarCheckboxItem,
-  MenubarComp,
-  MenubarContent,
-  MenubarGroup,
-  MenubarItem,
-  MenubarLabel,
-  MenubarMenu,
-  MenubarPortal,
-  MenubarRadioGroup,
-  MenubarRadioItem,
-  MenubarSeparator,
-  MenubarShortcut,
-  MenubarSub,
-  MenubarSubContent,
-  MenubarSubTrigger,
-  MenubarTrigger,
-} from './Menubar';
-
-export type {
-  MenubarSubItem,
-  MenubarMenuItem,
-  MenubarMenuConfig,
-  DynamicMenubarProps,
-} from './Menubar';
-
-export { MenuList, MenuListComp, MenuListOne, type iDfxMenu } from './MenuList';
-
-export {
-  NavigationMenu,
-  NavigationMenuComp,
-  NavigationMenuContent,
-  NavigationMenuIndicator,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  NavigationMenuViewport,
-} from './NavigationMenu';
 
 export {
   Popover,
@@ -281,13 +149,6 @@ export {
 export type { PaginationProps } from './Pagination';
 
 export { RadioGroup, RadioGroupComp, RadioGroupItem } from './RadioGroup';
-
-export {
-  Resizable,
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from './Resizable';
 
 export { ScrollArea, ScrollAreaComp, ScrollBar } from './ScrollArea';
 

@@ -1,6 +1,11 @@
 {
   "name": "@dashflowx/core",
-  "version": "2.0.125",
+  "version": "3.0.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BhupeshChauhan/dashflowx-core.git"
+  },
   "type": "module",
   "files": [
     "dist"
@@ -18,8 +23,12 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "build": "tsc && vite build && vite build --config vite.pro.config.ts",
+    "build:pro": "vite build --config vite.pro.config.ts",
+    "test": "node scripts/check-registry.mjs && node scripts/check-pro-boundary.mjs && node scripts/check-tier.mjs",
+    "pack:inspect": "node scripts/pack-inspect.mjs . && node scripts/pack-inspect.mjs core-pro",
+    "lint": "eslint src/registry.ts src/components/index.tsx src/pro/index.ts --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:all": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "prepack": "npm run build",
     "storybook": "storybook dev -p 6006",
@@ -103,7 +112,7 @@
     "storybook": "^8.0.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.2.2",
-    "vite": "^7.1.7",
+    "vite": "^6.3.5",
     "vite-plugin-dts": "^4.5.4",
     "vite-tsconfig-paths": "^4.3.1"
   },

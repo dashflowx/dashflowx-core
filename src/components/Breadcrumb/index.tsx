@@ -23,11 +23,10 @@ import {
   Plus,
 } from 'lucide-react';
 import {
-  DropdownMenuComp,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '../DropDownMenu/DropdownMenuComp';
+  PopoverComp as Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '../Popover';
 import {
   BreadcrumbComp,
   BreadcrumbEllipsis,
@@ -193,21 +192,23 @@ const BreadcrumbComponent = React.forwardRef<HTMLDivElement, iBreadcrumb>(({
             <li key={item.id} className="flex items-center">
               {/* Content */}
               {isDropdown ? (
-                <DropdownMenuComp>
-                  <DropdownMenuTrigger className={`${linkClasses} flex items-center`}>
+                <Popover>
+                  <PopoverTrigger className={`${linkClasses} flex items-center`}>
                     <span>{item.title}</span>
                     <BreadcrumbEllipsis className="ml-1 h-4 w-4" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-1">
                     {item.children?.map((child, childIndex) => (
-                      <DropdownMenuItem key={childIndex} className="cursor-pointer">
-                        <a href={child.href} className="block w-full">
-                          {child.title}
-                        </a>
-                      </DropdownMenuItem>
+                      <a
+                        key={childIndex}
+                        href={child.href}
+                        className="block cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-gray-100"
+                      >
+                        {child.title}
+                      </a>
                     ))}
-                  </DropdownMenuContent>
-                </DropdownMenuComp>
+                  </PopoverContent>
+                </Popover>
               ) : (
                 <div className="flex items-center">
                   {item.href && !isLast ? (

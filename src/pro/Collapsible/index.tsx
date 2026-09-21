@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { ChevronsUpDown } from 'lucide-react';
-import { Button } from '../Button';
+import { Button } from '../../components/Button';
 import {
   CollapsibleComp,
   CollapsibleContent,

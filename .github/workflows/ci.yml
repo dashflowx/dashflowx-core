@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint / test / pack inspect
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - run: yarn test
+      - run: yarn lint
+      - run: yarn build
+      - name: Inspect free tarball (no src/pro)
+        run: node scripts/pack-inspect.mjs .
+      - name: Inspect pro tarball (GitHub Packages only)
+        run: node scripts/pack-inspect.mjs core-pro
