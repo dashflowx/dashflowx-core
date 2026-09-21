@@ -1,6 +1,6 @@
 /**
- * @dashflow/core-pro entry (C04/C05).
- * Not imported by the free package. Peer-depends on @dashflow/core.
+ * @dashflowx/core-pro entry (C04/C05).
+ * Not imported by the free package. Peer-depends on @dashflowx/core.
  */
 export { Calendar } from './Calendar';
 

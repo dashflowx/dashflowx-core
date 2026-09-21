@@ -3,7 +3,7 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 
-/** C05: @dashflow/core-pro build. Do not merge this entry into the free package. */
+/** C05: @dashflowx/core-pro build. Do not merge this entry into the free package. */
 export default defineConfig({
   resolve: {
     alias: {
@@ -19,12 +19,12 @@ export default defineConfig({
       fileName: (format) => `index.${format}.js`,
     },
     rollupOptions: {
-      external: ['react', 'react-dom', '@dashflow/core'],
+      external: ['react', 'react-dom', '@dashflowx/core'],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
-          '@dashflow/core': 'dashflowx',
+          '@dashflowx/core': 'dashflowx',
         },
       },
     },

@@ -17,7 +17,7 @@ Dashflow-X is an open-source UI design system library designed to help developer
 You can install Dashflow-X using npm:
 
 ```bash
-npm i @dashflow/core
+npm i @dashflowx/core
 ```
 
 ## Getting Started

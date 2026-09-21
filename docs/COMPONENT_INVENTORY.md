@@ -29,7 +29,7 @@ Every component folder appears once. `planMatch=unknown` is tagged, not ignored.
 | `core.dialog` | Dialog | free | true | free |  |
 | `core.drawer` | Drawer | free | true | free |  |
 | `core.dropdown-menu` | DropDownMenu | pro | true | unknown | Not named in plan; same family as ContextMenu/Menubar — tagged pro |
-| `core.form` | Form | free | false | unknown | Extract to @dashflow/forms (M01). Stays free tarball until extract. |
+| `core.form` | Form | free | false | unknown | Extract to @dashflowx/forms (M01). Stays free tarball until extract. |
 | `core.grid` | Grid | free | true | free |  |
 | `core.h1` | H1 | free | true | free |  |
 | `core.h2` | H2 | free | true | free |  |
@@ -64,7 +64,7 @@ Every component folder appears once. `planMatch=unknown` is tagged, not ignored.
 | `core.slider` | Slider | free | true | unknown |  |
 | `core.sonner` | Sonner | free | true | free | Toast family |
 | `core.switch` | Switch | free | true | free |  |
-| `core.table` | Table | free | false | unknown | Extract to @dashflow/datagrid (G02). Stays free tarball until extract. |
+| `core.table` | Table | free | false | unknown | Extract to @dashflowx/datagrid (G02). Stays free tarball until extract. |
 | `core.tabs` | Tabs | free | true | free |  |
 | `core.td` | Td | free | false | unknown | Table cell; extract with datagrid |
 | `core.textarea` | TextArea | free | true | free |  |
