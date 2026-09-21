@@ -14,10 +14,12 @@
   "module": "dist/index.es.js",
   "exports": {
     ".": {
+      "types": "./dist/index.es.d.ts",
       "import": "./dist/index.es.js",
       "require": "./dist/index.umd.js"
     }
   },
+  "types": "dist/index.es.d.ts",
   "publishConfig": {
     "access": "public"
   },
