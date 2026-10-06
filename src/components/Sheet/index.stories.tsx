@@ -1,28 +1,47 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { 
-  DynamicSheet, 
-  InfoSheet, 
-  SettingsSheet, 
-  ConfirmationSheet
-} from '.';
+import { Sheet, DynamicSheet, InfoSheet, ConfirmationSheet, SettingsSheet } from '.';
 import { Button } from '../Button';
 
-const meta: Meta<typeof DynamicSheet> = {
-  title: 'Components/Sheet',
-  component: DynamicSheet,
-  parameters: {
-    layout: 'centered',
-  },
+const meta: Meta<typeof Sheet> = {
+  title: 'Element/Sheet',
+  component: Sheet,
+  parameters: { layout: 'centered' },
   argTypes: {
-    config: {
-      control: 'object',
+    type: {
+      control: 'select',
+      options: ['default', 'info', 'confirmation', 'settings'],
     },
-    open: {
-      control: 'boolean',
+    side: {
+      control: 'select',
+      options: ['top', 'right', 'bottom', 'left'],
     },
-    className: {
-      control: 'text',
+    size: {
+      control: 'select',
+      options: ['sm', 'md', 'lg', 'xl', 'full'],
     },
+    background: {
+      control: 'select',
+      options: [
+        'default',
+        'white',
+        'muted',
+        'glass',
+        'gradient',
+        'blue',
+        'yellow',
+        'gray',
+        'red',
+        'green',
+        'purple',
+      ],
+    },
+    triggerVariant: {
+      control: 'select',
+      options: ['primary', 'secondary', 'outline', 'ghost', 'destructive'],
+    },
+    showCloseButton: { control: 'boolean' },
+    loading: { control: 'boolean' },
+    disabled: { control: 'boolean' },
   },
   tags: ['autodocs'],
 };
@@ -32,220 +51,113 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    config: {
-      id: 'default',
-      title: 'Default Sheet',
-      description: 'This is a default sheet configuration.',
-      side: 'right',
-      size: 'md',
-      content: (
-        <div className="py-4">
-          <p className="text-sm text-gray-600">
-            This is the default sheet content. You can put any React content here.
-          </p>
-        </div>
-      ),
-      actions: [
-        {
-          id: 'ok',
-          label: 'OK',
-          variant: 'primary',
-          type: 'button',
-          closeOnClick: true,
-        },
-      ],
-    },
+    triggerText: 'Open Sheet',
+    type: 'default',
+    side: 'right',
+    size: 'md',
+    title: 'Sheet',
+    description: 'Slide-over panel from the edge.',
   },
 };
 
-export const InfoSheetExample: Story = {
+export const Info: Story = {
+  args: {
+    type: 'info',
+    triggerText: 'Open info',
+  },
+};
+
+export const Confirmation: Story = {
+  args: {
+    type: 'confirmation',
+    triggerText: 'Confirm',
+  },
+};
+
+export const Settings: Story = {
+  args: {
+    type: 'settings',
+    triggerText: 'Settings',
+  },
+};
+
+export const Sides: Story = {
+  render: () => (
+    <div className="flex flex-wrap gap-2">
+      {(['top', 'right', 'bottom', 'left'] as const).map((side) => (
+        <Sheet key={side} side={side} triggerText={side} title={side} size="sm" />
+      ))}
+    </div>
+  ),
+};
+
+export const Backgrounds: Story = {
+  render: () => (
+    <div className="flex flex-wrap gap-2">
+      {(['blue', 'yellow', 'gray', 'red', 'green', 'purple', 'glass', 'gradient'] as const).map(
+        (background) => (
+          <Sheet
+            key={background}
+            background={background}
+            triggerText={background}
+            title={background}
+            size="sm"
+          />
+        )
+      )}
+    </div>
+  ),
+};
+
+export const WithChildren: Story = {
+  args: {
+    triggerText: 'Custom body',
+    title: 'Custom content',
+    description: 'Pass children for the body.',
+  },
+  render: (args) => (
+    <Sheet {...args}>
+      <p className="text-sm text-gray-600">Form fields or custom markup go here.</p>
+    </Sheet>
+  ),
+};
+
+export const CustomTrigger: Story = {
+  render: () => (
+    <Sheet
+      title="Custom trigger"
+      trigger={<Button variant="primary">Launch sheet</Button>}
+    >
+      <p className="text-sm">Opened via a custom trigger node.</p>
+    </Sheet>
+  ),
+};
+
+export const PresetInfoSheet: Story = {
   render: () => <InfoSheet />,
 };
 
-export const SettingsSheetExample: Story = {
-  render: () => <SettingsSheet />,
-};
-
-export const ConfirmationSheetExample: Story = {
+export const PresetConfirmationSheet: Story = {
   render: () => <ConfirmationSheet />,
 };
 
-export const BackgroundColors: Story = {
-  render: () => (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">Background Colors</h3>
-        <div className="flex gap-2 flex-wrap">
-          {(['blue', 'green', 'red', 'yellow', 'purple', 'pink', 'indigo', 'emerald', 'teal', 'cyan'] as const).map(color => (
-            <DynamicSheet
-              key={color}
-              config={{
-                id: color,
-                title: `${color.charAt(0).toUpperCase() + color.slice(1)} Background`,
-                description: `This sheet has a ${color} background color.`,
-                side: 'right',
-                size: 'md',
-                backgroundColor: color,
-                backgroundIntensity: '50',
-                content: (
-                  <div className="py-4">
-                    <p className="text-sm text-gray-600">
-                      This sheet uses the {color}-50 background color.
-                    </p>
-                  </div>
-                ),
-                actions: [
-                  { id: 'close', label: 'Close', variant: 'outline', type: 'button', closeOnClick: true },
-                ],
-              }}
-              trigger={<Button variant="outline">{color.charAt(0).toUpperCase() + color.slice(1)}</Button>}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  ),
+export const PresetSettingsSheet: Story = {
+  render: () => <SettingsSheet />,
 };
 
-export const BackgroundIntensities: Story = {
+export const DynamicConfig: Story = {
   render: () => (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">Background Intensities</h3>
-        <div className="flex gap-2 flex-wrap">
-          {(['50', '100', '200', '300', '400', '500'] as const).map(intensity => (
-            <DynamicSheet
-              key={intensity}
-              config={{
-                id: intensity,
-                title: `Blue ${intensity}`,
-                description: `This sheet has blue-${intensity} background.`,
-                side: 'right',
-                size: 'md',
-                backgroundColor: 'blue',
-                backgroundIntensity: intensity,
-                content: (
-                  <div className="py-4">
-                    <p className="text-sm text-gray-600">
-                      This sheet uses blue-{intensity} background.
-                    </p>
-                  </div>
-                ),
-                actions: [
-                  { id: 'close', label: 'Close', variant: 'outline', type: 'button', closeOnClick: true },
-                ],
-              }}
-              trigger={<Button variant="outline">Blue {intensity}</Button>}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
+    <DynamicSheet
+      config={{
+        id: 'demo',
+        title: 'Dynamic config',
+        description: 'Built from SheetConfig.',
+        side: 'left',
+        size: 'md',
+        background: 'purple',
+        content: <p className="text-sm">Config-driven content.</p>,
+        actions: [{ id: 'done', label: 'Done', variant: 'primary', closeOnClick: true }],
+      }}
+    />
   ),
-};
-
-export const SpecialBackgrounds: Story = {
-  render: () => (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">Special Backgrounds</h3>
-        <div className="flex gap-2 flex-wrap">
-          <DynamicSheet
-            config={{
-              id: 'transparent',
-              title: 'Transparent',
-              description: 'This sheet has a transparent background.',
-              side: 'right',
-              size: 'md',
-              backgroundColor: 'transparent',
-              content: (
-                <div className="py-4">
-                  <p className="text-sm text-gray-600">
-                    This sheet has a transparent background.
-                  </p>
-                </div>
-              ),
-              actions: [
-                { id: 'close', label: 'Close', variant: 'outline', type: 'button', closeOnClick: true },
-              ],
-            }}
-            trigger={<Button variant="outline">Transparent</Button>}
-          />
-          
-          <DynamicSheet
-            config={{
-              id: 'glass',
-              title: 'Glass Effect',
-              description: 'This sheet has a glass morphism effect.',
-              side: 'right',
-              size: 'md',
-              backgroundColor: 'glass',
-              content: (
-                <div className="py-4">
-                  <p className="text-sm text-gray-600">
-                    This sheet has a glass morphism effect with backdrop blur.
-                  </p>
-                </div>
-              ),
-              actions: [
-                { id: 'close', label: 'Close', variant: 'outline', type: 'button', closeOnClick: true },
-              ],
-            }}
-            trigger={<Button variant="outline">Glass</Button>}
-          />
-          
-          <DynamicSheet
-            config={{
-              id: 'gradient',
-              title: 'Gradient',
-              description: 'This sheet has a gradient background.',
-              side: 'right',
-              size: 'md',
-              backgroundColor: 'gradient',
-              content: (
-                <div className="py-4">
-                  <p className="text-sm text-gray-600">
-                    This sheet has a beautiful gradient background.
-                  </p>
-                </div>
-              ),
-              actions: [
-                { id: 'close', label: 'Close', variant: 'outline', type: 'button', closeOnClick: true },
-              ],
-            }}
-            trigger={<Button variant="outline">Gradient</Button>}
-          />
-        </div>
-      </div>
-    </div>
-  ),
-};
-
-export const CustomBackgroundColor: Story = {
-  args: {
-    config: {
-      id: 'custom-bg',
-      title: 'Custom Background',
-      description: 'This sheet has a custom background color.',
-      side: 'right',
-      size: 'md',
-      customBgColor: '#f0f9ff',
-      content: (
-        <div className="py-4">
-          <p className="text-sm text-gray-600">
-            This sheet uses a custom background color: #f0f9ff
-          </p>
-        </div>
-      ),
-      actions: [
-        {
-          id: 'ok',
-          label: 'OK',
-          variant: 'primary',
-          type: 'button',
-          closeOnClick: true,
-        },
-      ],
-    },
-  },
 };

@@ -1,36 +1,86 @@
+import type { ReactNode } from 'react';
+
 import {
   TooltipComp,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  type TooltipSize,
+  type TooltipVariant,
 } from './TooltipComp';
 
-interface iTooltip {
-  tooltipTrigger: React.ReactNode;
-  tooltipContent: React.ReactNode;
-  side?: 'bottom' | 'left' | 'right' | 'top';
-  align?: 'start' | 'end';
+export type TooltipSide = 'top' | 'right' | 'bottom' | 'left';
+export type TooltipAlign = 'start' | 'center' | 'end';
+
+export type { TooltipSize, TooltipVariant };
+
+export interface iTooltip {
+  tooltipTrigger: ReactNode;
+  tooltipContent: ReactNode;
+  side?: TooltipSide;
+  align?: TooltipAlign;
+  variant?: TooltipVariant;
+  size?: TooltipSize;
+  /** Open delay in ms. */
+  delayDuration?: number;
+  /** Skip delay when moving between tooltips. */
+  skipDelayDuration?: number;
+  sideOffset?: number;
+  open?: boolean;
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  disabled?: boolean;
   className?: string;
+  contentClassName?: string;
+  triggerClassName?: string;
 }
+
+export type TooltipProps = iTooltip;
 
 function Tooltip({
   tooltipTrigger,
   tooltipContent,
-  side,
-  align,
+  side = 'top',
+  align = 'center',
+  variant = 'default',
+  size = 'md',
+  delayDuration = 100,
+  skipDelayDuration = 300,
+  sideOffset = 4,
+  open,
+  defaultOpen,
+  onOpenChange,
+  disabled = false,
   className,
-}: iTooltip) {
+  contentClassName,
+  triggerClassName,
+}: TooltipProps) {
+  if (disabled) {
+    return <>{tooltipTrigger}</>;
+  }
+
   return (
-    <TooltipProvider>
-      <TooltipComp delayDuration={100}>
-        <TooltipTrigger asChild>{tooltipTrigger}</TooltipTrigger>
-        <TooltipContent side={side} align={align} className={className}>
+    <TooltipProvider delayDuration={delayDuration} skipDelayDuration={skipDelayDuration}>
+      <TooltipComp open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange} delayDuration={delayDuration}>
+        <TooltipTrigger asChild className={triggerClassName}>
+          {tooltipTrigger}
+        </TooltipTrigger>
+        <TooltipContent
+          side={side}
+          align={align}
+          sideOffset={sideOffset}
+          variant={variant}
+          size={size}
+          className={contentClassName ?? className}
+        >
           {tooltipContent}
         </TooltipContent>
       </TooltipComp>
     </TooltipProvider>
   );
 }
+
+Tooltip.displayName = 'Tooltip';
 
 export {
   Tooltip,

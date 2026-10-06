@@ -1,350 +1,367 @@
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
-// Completely standalone HTML/CSS Sonner/Toast component for Markdoc compatibility
-// No sonner library, no ES module dependencies, pure HTML/CSS implementation
+export type SonnerToastType = 'default' | 'success' | 'error' | 'warning' | 'info';
+export type SonnerPosition =
+  | 'top-left'
+  | 'top-center'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-center'
+  | 'bottom-right';
+export type SonnerSize = 'sm' | 'md' | 'lg';
 
-// Simple utility function
-function cn(...classes: (string | undefined | null | false)[]): string {
-  return classes.filter(Boolean).join(' ');
+export interface SonnerToastAction {
+  label: string;
+  onClick: () => void;
 }
 
-// Toast types
-export interface ToastProps {
+export interface SonnerToastProps {
   title?: string;
   description?: string;
-  type?: 'default' | 'success' | 'error' | 'warning' | 'info';
+  /** Prefer `variant`. Kept for existing callers. */
+  type?: SonnerToastType;
+  variant?: SonnerToastType;
+  size?: SonnerSize;
   duration?: number;
-  action?: {
-    label: string;
-    onClick: () => void;
-  };
-  cancel?: {
-    label: string;
-    onClick: () => void;
-  };
+  action?: SonnerToastAction;
+  cancel?: SonnerToastAction;
   className?: string;
-  position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+  position?: SonnerPosition;
   showCloseButton?: boolean;
   onClose?: () => void;
 }
 
-// Toast state management
-let toastId = 0;
-const toasts: Array<ToastProps & { id: number }> = [];
-const toastListeners: Array<(toasts: Array<ToastProps & { id: number }>) => void> = [];
+/** @deprecated Use `SonnerToastProps`. */
+export type ToastProps = SonnerToastProps;
 
-// Clear all toasts function
-function clearAllToasts() {
-  toasts.length = 0;
-  notifyListeners();
+export type SonnerToastRecord = SonnerToastProps & { id: number };
+
+export interface SonnerProps {
+  position?: SonnerPosition;
+  size?: SonnerSize;
+  gap?: SonnerSize;
+  className?: string;
+  isolatedState?: ReturnType<typeof createIsolatedToastState>;
 }
 
-// Create isolated toast state for each instance
-function createIsolatedToastState() {
-  let instanceToastId = 0;
-  const instanceToasts: Array<ToastProps & { id: number }> = [];
-  const instanceListeners: Array<(toasts: Array<ToastProps & { id: number }>) => void> = [];
-
-  const addToast = (toastData: ToastProps) => {
-    const id = ++instanceToastId;
-    const newToast = { ...toastData, id };
-    instanceToasts.push(newToast);
-    instanceListeners.forEach(listener => listener([...instanceToasts]));
-
-    // Auto remove after duration
-    const duration = toastData.duration || 5000;
-    setTimeout(() => {
-      removeToast(id);
-    }, duration);
-
-    return id;
-  };
-
-  const removeToast = (id: number) => {
-    const index = instanceToasts.findIndex(toast => toast.id === id);
-    if (index > -1) {
-      instanceToasts.splice(index, 1);
-      instanceListeners.forEach(listener => listener([...instanceToasts]));
-    }
-  };
-
-  const clearAllToasts = () => {
-    instanceToasts.length = 0;
-    instanceListeners.forEach(listener => listener([...instanceToasts]));
-  };
-
-  const toast = {
-    success: (title: string, options?: Partial<ToastProps>) =>
-      addToast({ ...options, title, type: 'success' }),
-    error: (title: string, options?: Partial<ToastProps>) =>
-      addToast({ ...options, title, type: 'error' }),
-    warning: (title: string, options?: Partial<ToastProps>) =>
-      addToast({ ...options, title, type: 'warning' }),
-    info: (title: string, options?: Partial<ToastProps>) =>
-      addToast({ ...options, title, type: 'info' }),
-    default: (title: string, options?: Partial<ToastProps>) =>
-      addToast({ ...options, title, type: 'default' }),
-  };
-
-  return {
-    toasts: instanceToasts,
-    listeners: instanceListeners,
-    toast,
-    clearAllToasts,
-  };
-}
-
-// Toast functions
-const toast = {
-  success: (title: string, options?: Partial<ToastProps>) => 
-    addToast({ ...options, title, type: 'success' }),
-  error: (title: string, options?: Partial<ToastProps>) => 
-    addToast({ ...options, title, type: 'error' }),
-  warning: (title: string, options?: Partial<ToastProps>) => 
-    addToast({ ...options, title, type: 'warning' }),
-  info: (title: string, options?: Partial<ToastProps>) => 
-    addToast({ ...options, title, type: 'info' }),
-  default: (title: string, options?: Partial<ToastProps>) => 
-    addToast({ ...options, title, type: 'default' }),
+const TYPE_CLASSES: Record<
+  SonnerToastType,
+  { container: string; icon: string; title: string; description: string }
+> = {
+  default: {
+    container: 'bg-white border-gray-200 dark:bg-gray-950 dark:border-gray-700',
+    icon: 'text-gray-600 dark:text-gray-300',
+    title: 'text-gray-800 dark:text-gray-100',
+    description: 'text-gray-700 dark:text-gray-300',
+  },
+  success: {
+    container: 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800',
+    icon: 'text-green-600 dark:text-green-400',
+    title: 'text-green-800 dark:text-green-100',
+    description: 'text-green-700 dark:text-green-200',
+  },
+  error: {
+    container: 'bg-red-50 border-red-200 dark:bg-red-950 dark:border-red-800',
+    icon: 'text-red-600 dark:text-red-400',
+    title: 'text-red-800 dark:text-red-100',
+    description: 'text-red-700 dark:text-red-200',
+  },
+  warning: {
+    container: 'bg-yellow-50 border-yellow-200 dark:bg-yellow-950 dark:border-yellow-800',
+    icon: 'text-yellow-600 dark:text-yellow-400',
+    title: 'text-yellow-800 dark:text-yellow-100',
+    description: 'text-yellow-700 dark:text-yellow-200',
+  },
+  info: {
+    container: 'bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800',
+    icon: 'text-blue-600 dark:text-blue-400',
+    title: 'text-blue-800 dark:text-blue-100',
+    description: 'text-blue-700 dark:text-blue-200',
+  },
 };
 
-// Add toast function
-function addToast(toastData: ToastProps) {
-  const id = ++toastId;
-  const newToast = { ...toastData, id };
-  toasts.push(newToast);
-  notifyListeners();
-  
-  // Auto remove after duration
-  const duration = toastData.duration || 5000;
-  setTimeout(() => {
-    removeToast(id);
-  }, duration);
-  
-  return id;
+const TYPE_ICON: Record<SonnerToastType, string> = {
+  default: '•',
+  success: '✓',
+  error: '✕',
+  warning: '⚠',
+  info: 'ℹ',
+};
+
+const SIZE_CLASSES: Record<SonnerSize, string> = {
+  sm: 'p-3 pr-5 text-xs gap-2',
+  md: 'p-4 pr-6 text-sm gap-3',
+  lg: 'p-5 pr-7 text-base gap-4',
+};
+
+const POSITION_CLASSES: Record<SonnerPosition, string> = {
+  'top-left': 'top-4 left-4',
+  'top-center': 'top-4 left-1/2 -translate-x-1/2',
+  'top-right': 'top-4 right-4',
+  'bottom-left': 'bottom-4 left-4',
+  'bottom-center': 'bottom-4 left-1/2 -translate-x-1/2',
+  'bottom-right': 'bottom-4 right-4',
+};
+
+const GAP_CLASSES: Record<SonnerSize, string> = {
+  sm: 'space-y-1',
+  md: 'space-y-2',
+  lg: 'space-y-3',
+};
+
+function resolveType(toast: Pick<SonnerToastProps, 'type' | 'variant'>): SonnerToastType {
+  return toast.variant ?? toast.type ?? 'default';
 }
 
-// Remove toast function
+let toastId = 0;
+const toasts: SonnerToastRecord[] = [];
+const toastListeners: Array<(next: SonnerToastRecord[]) => void> = [];
+
+function notifyListeners() {
+  toastListeners.forEach((listener) => listener([...toasts]));
+}
+
 function removeToast(id: number) {
-  const index = toasts.findIndex(toast => toast.id === id);
+  const index = toasts.findIndex((item) => item.id === id);
   if (index > -1) {
     toasts.splice(index, 1);
     notifyListeners();
   }
 }
 
-// Notify listeners
-function notifyListeners() {
-  toastListeners.forEach(listener => listener([...toasts]));
+function clearAllToasts() {
+  toasts.length = 0;
+  notifyListeners();
 }
 
-// Individual Toast Component
-function ToastItem({ toast }: { toast: ToastProps & { id: number } }) {
-  const getTypeClasses = () => {
-    switch (toast.type) {
-      case 'success':
-        return {
-          container: 'bg-green-50 border-green-200',
-          icon: 'text-green-600',
-          title: 'text-green-800',
-          description: 'text-green-700',
-        };
-      case 'error':
-        return {
-          container: 'bg-red-50 border-red-200',
-          icon: 'text-red-600',
-          title: 'text-red-800',
-          description: 'text-red-700',
-        };
-      case 'warning':
-        return {
-          container: 'bg-yellow-50 border-yellow-200',
-          icon: 'text-yellow-600',
-          title: 'text-yellow-800',
-          description: 'text-yellow-700',
-        };
-      case 'info':
-        return {
-          container: 'bg-blue-50 border-blue-200',
-          icon: 'text-blue-600',
-          title: 'text-blue-800',
-          description: 'text-blue-700',
-        };
-      case 'default':
-      default:
-        return {
-          container: 'bg-white border-gray-200',
-          icon: 'text-gray-600',
-          title: 'text-gray-800',
-          description: 'text-gray-700',
-        };
+function addToast(toastData: SonnerToastProps) {
+  const id = ++toastId;
+  const newToast: SonnerToastRecord = { ...toastData, id };
+  toasts.push(newToast);
+  notifyListeners();
+
+  const duration = toastData.duration ?? 5000;
+  if (duration > 0) {
+    setTimeout(() => removeToast(id), duration);
+  }
+
+  return id;
+}
+
+function createIsolatedToastState() {
+  let instanceToastId = 0;
+  const instanceToasts: SonnerToastRecord[] = [];
+  const instanceListeners: Array<(next: SonnerToastRecord[]) => void> = [];
+
+  const remove = (id: number) => {
+    const index = instanceToasts.findIndex((item) => item.id === id);
+    if (index > -1) {
+      instanceToasts.splice(index, 1);
+      instanceListeners.forEach((listener) => listener([...instanceToasts]));
     }
   };
 
-  const getIcon = () => {
-    switch (toast.type) {
-      case 'success':
-        return '✓';
-      case 'error':
-        return '✕';
-      case 'warning':
-        return '⚠';
-      case 'info':
-        return 'ℹ';
-      case 'default':
-      default:
-        return '•';
+  const add = (toastData: SonnerToastProps) => {
+    const id = ++instanceToastId;
+    instanceToasts.push({ ...toastData, id });
+    instanceListeners.forEach((listener) => listener([...instanceToasts]));
+
+    const duration = toastData.duration ?? 5000;
+    if (duration > 0) {
+      setTimeout(() => remove(id), duration);
     }
+    return id;
   };
 
-  const typeClasses = getTypeClasses();
-  const icon = getIcon();
+  const clear = () => {
+    instanceToasts.length = 0;
+    instanceListeners.forEach((listener) => listener([...instanceToasts]));
+  };
+
+  const api = {
+    success: (title: string, options?: Partial<SonnerToastProps>) =>
+      add({ ...options, title, type: 'success', variant: 'success' }),
+    error: (title: string, options?: Partial<SonnerToastProps>) =>
+      add({ ...options, title, type: 'error', variant: 'error' }),
+    warning: (title: string, options?: Partial<SonnerToastProps>) =>
+      add({ ...options, title, type: 'warning', variant: 'warning' }),
+    info: (title: string, options?: Partial<SonnerToastProps>) =>
+      add({ ...options, title, type: 'info', variant: 'info' }),
+    default: (title: string, options?: Partial<SonnerToastProps>) =>
+      add({ ...options, title, type: 'default', variant: 'default' }),
+  };
+
+  return {
+    toasts: instanceToasts,
+    listeners: instanceListeners,
+    toast: api,
+    clearAllToasts: clear,
+    removeToast: remove,
+  };
+}
+
+const toast = {
+  success: (title: string, options?: Partial<SonnerToastProps>) =>
+    addToast({ ...options, title, type: 'success', variant: 'success' }),
+  error: (title: string, options?: Partial<SonnerToastProps>) =>
+    addToast({ ...options, title, type: 'error', variant: 'error' }),
+  warning: (title: string, options?: Partial<SonnerToastProps>) =>
+    addToast({ ...options, title, type: 'warning', variant: 'warning' }),
+  info: (title: string, options?: Partial<SonnerToastProps>) =>
+    addToast({ ...options, title, type: 'info', variant: 'info' }),
+  default: (title: string, options?: Partial<SonnerToastProps>) =>
+    addToast({ ...options, title, type: 'default', variant: 'default' }),
+};
+
+export function ToastItem({
+  toast: item,
+  size = 'md',
+  onDismiss,
+}: {
+  toast: SonnerToastRecord | SonnerToastProps;
+  size?: SonnerSize;
+  onDismiss?: () => void;
+}) {
+  const type = resolveType(item);
+  const typeClasses = TYPE_CLASSES[type];
+  const toastSize = item.size ?? size;
+  const id = 'id' in item ? item.id : undefined;
 
   return (
     <div
+      role="status"
       className={cn(
-        'relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-6 shadow-lg transition-all',
+        'relative flex w-full max-w-sm items-start overflow-hidden rounded-md border shadow-lg transition-all',
+        SIZE_CLASSES[toastSize],
         typeClasses.container,
-        toast.className
+        item.className
       )}
     >
-      {/* Icon */}
-      <div className={cn('flex-shrink-0 text-lg', typeClasses.icon)}>
-        {icon}
+      <div className={cn('flex-shrink-0 text-lg leading-none', typeClasses.icon)} aria-hidden>
+        {TYPE_ICON[type]}
       </div>
 
-      {/* Content */}
-      <div className="flex-1 space-y-1">
-        {toast.title && (
-          <div className={cn('text-sm font-semibold', typeClasses.title)}>
-            {toast.title}
+      <div className="min-w-0 flex-1 space-y-1">
+        {item.title ? (
+          <div className={cn('font-semibold', typeClasses.title)}>{item.title}</div>
+        ) : null}
+        {item.description ? (
+          <div className={cn(typeClasses.description)}>{item.description}</div>
+        ) : null}
+        {(item.action || item.cancel) && (
+          <div className="flex gap-2 pt-1">
+            {item.action ? (
+              <button
+                type="button"
+                onClick={item.action.onClick}
+                className="rounded-md bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700"
+              >
+                {item.action.label}
+              </button>
+            ) : null}
+            {item.cancel ? (
+              <button
+                type="button"
+                onClick={item.cancel.onClick}
+                className="rounded-md bg-gray-200 px-3 py-1 text-xs text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-200"
+              >
+                {item.cancel.label}
+              </button>
+            ) : null}
           </div>
         )}
-        {toast.description && (
-          <div className={cn('text-sm', typeClasses.description)}>
-            {toast.description}
-          </div>
-        )}
       </div>
 
-      {/* Actions */}
-      <div className="flex space-x-2">
-        {toast.action && (
-          <button
-            onClick={toast.action.onClick}
-            className="rounded-md bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700"
-          >
-            {toast.action.label}
-          </button>
-        )}
-        {toast.cancel && (
-          <button
-            onClick={toast.cancel.onClick}
-            className="rounded-md bg-gray-200 px-3 py-1 text-xs text-gray-700 hover:bg-gray-300"
-          >
-            {toast.cancel.label}
-          </button>
-        )}
-      </div>
-
-      {/* Close Button */}
-      {toast.showCloseButton && (
+      {item.showCloseButton ? (
         <button
+          type="button"
+          aria-label="Close"
           onClick={() => {
-            removeToast(toast.id);
-            toast.onClose?.();
+            if (onDismiss) onDismiss();
+            else if (id !== undefined) removeToast(id);
+            item.onClose?.();
           }}
-          className="absolute right-2 top-2 text-gray-400 hover:text-gray-600"
+          className="absolute right-2 top-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
         >
           ×
         </button>
-      )}
+      ) : null}
     </div>
   );
 }
 
-// Toast Container Component
-function ToastContainer({ 
-  position = 'top-right', 
-  isolatedState 
-}: { 
-  position?: ToastProps['position'];
-  isolatedState?: ReturnType<typeof createIsolatedToastState>;
-}) {
-  const [toastList, setToastList] = React.useState<Array<ToastProps & { id: number }>>([]);
+export function ToastContainer({
+  position = 'top-right',
+  size = 'md',
+  gap = 'md',
+  className,
+  isolatedState,
+}: SonnerProps) {
+  const [toastList, setToastList] = React.useState<SonnerToastRecord[]>([]);
 
   React.useEffect(() => {
-    const listener = (toasts: Array<ToastProps & { id: number }>) => {
-      setToastList(toasts);
-    };
+    const listener = (next: SonnerToastRecord[]) => setToastList(next);
 
     if (isolatedState) {
       isolatedState.listeners.push(listener);
       setToastList([...isolatedState.toasts]);
-      
       return () => {
         const index = isolatedState.listeners.indexOf(listener);
-        if (index > -1) {
-          isolatedState.listeners.splice(index, 1);
-        }
-      };
-    } else {
-      toastListeners.push(listener);
-      setToastList([...toasts]);
-
-      return () => {
-        const index = toastListeners.indexOf(listener);
-        if (index > -1) {
-          toastListeners.splice(index, 1);
-        }
+        if (index > -1) isolatedState.listeners.splice(index, 1);
       };
     }
+
+    toastListeners.push(listener);
+    setToastList([...toasts]);
+    return () => {
+      const index = toastListeners.indexOf(listener);
+      if (index > -1) toastListeners.splice(index, 1);
+    };
   }, [isolatedState]);
-
-  const getPositionClasses = () => {
-    switch (position) {
-      case 'top-left':
-        return 'top-4 left-4';
-      case 'top-center':
-        return 'top-4 left-1/2 transform -translate-x-1/2';
-      case 'top-right':
-        return 'top-4 right-4';
-      case 'bottom-left':
-        return 'bottom-4 left-4';
-      case 'bottom-center':
-        return 'bottom-4 left-1/2 transform -translate-x-1/2';
-      case 'bottom-right':
-        return 'bottom-4 right-4';
-      default:
-        return 'top-4 right-4';
-    }
-  };
 
   if (toastList.length === 0) return null;
 
   return (
-    <div className={cn('fixed z-50 flex flex-col space-y-2', getPositionClasses())}>
-      {toastList.map((toast) => (
-        <ToastItem key={toast.id} toast={toast} />
+    <div
+      className={cn(
+        'fixed z-50 flex w-full max-w-sm flex-col',
+        POSITION_CLASSES[position],
+        GAP_CLASSES[gap],
+        className
+      )}
+    >
+      {toastList.map((item) => (
+        <ToastItem
+          key={item.id}
+          toast={item}
+          size={size}
+          onDismiss={() => {
+            if (isolatedState) isolatedState.removeToast(item.id);
+            else removeToast(item.id);
+          }}
+        />
       ))}
     </div>
   );
 }
 
-// Main Sonner Component (Toast Provider)
-function Sonner({ 
-  position = 'top-right', 
-  isolatedState 
-}: { 
-  position?: ToastProps['position'];
-  isolatedState?: ReturnType<typeof createIsolatedToastState>;
-}) {
-  return <ToastContainer position={position} isolatedState={isolatedState} />;
+function Sonner(props: SonnerProps) {
+  return <ToastContainer {...props} />;
 }
 
+Sonner.displayName = 'Sonner';
 
-// Export components and utilities
-export { Sonner, ToastContainer, ToastItem, toast, createIsolatedToastState, clearAllToasts };
+const SonnerComp = Sonner;
 
-// Legacy exports for compatibility
-export const SonnerComp = Sonner;
+export {
+  Sonner,
+  SonnerComp,
+  toast,
+  createIsolatedToastState,
+  clearAllToasts,
+  removeToast,
+  TYPE_CLASSES as SONNER_TYPE_CLASSES,
+  POSITION_CLASSES as SONNER_POSITION_CLASSES,
+  SIZE_CLASSES as SONNER_SIZE_CLASSES,
+};

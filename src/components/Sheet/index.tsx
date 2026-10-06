@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import * as React from 'react';
 import { Button, type ButtonVariant } from '../Button';
 import { cn } from '@/lib/utils';
 import {
@@ -12,41 +12,72 @@ import {
   SheetPortal,
   SheetTitle,
   SheetTrigger,
+  type SheetSide,
+  type SheetSize,
 } from './SheetComp';
 
-// Types and Interfaces
-export type SheetBgColor = 
-  | 'white' 
-  | 'gray' 
-  | 'slate' 
-  | 'zinc' 
-  | 'neutral' 
-  | 'stone' 
-  | 'red' 
-  | 'orange' 
-  | 'amber' 
-  | 'yellow' 
-  | 'lime' 
-  | 'green' 
-  | 'emerald' 
-  | 'teal' 
-  | 'cyan' 
-  | 'sky' 
-  | 'blue' 
-  | 'indigo' 
-  | 'violet' 
-  | 'purple' 
-  | 'fuchsia' 
-  | 'pink' 
+export type { SheetSide, SheetSize };
+
+export type SheetType = 'default' | 'info' | 'confirmation' | 'settings';
+
+export type SheetBackground =
+  | 'default'
+  | 'white'
+  | 'muted'
+  | 'glass'
+  | 'gradient'
+  | 'blue'
+  | 'yellow'
+  | 'gray'
+  | 'red'
+  | 'green'
+  | 'purple';
+
+/** @deprecated Prefer `SheetBackground`. Kept for DynamicSheet / config callers. */
+export type SheetBgColor =
+  | 'white'
+  | 'gray'
+  | 'slate'
+  | 'zinc'
+  | 'neutral'
+  | 'stone'
+  | 'red'
+  | 'orange'
+  | 'amber'
+  | 'yellow'
+  | 'lime'
+  | 'green'
+  | 'emerald'
+  | 'teal'
+  | 'cyan'
+  | 'sky'
+  | 'blue'
+  | 'indigo'
+  | 'violet'
+  | 'purple'
+  | 'fuchsia'
+  | 'pink'
   | 'rose'
   | 'transparent'
   | 'glass'
   | 'gradient';
 
-export type SheetBgIntensity = '50' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900' | '950';
+/** @deprecated Prefer `SheetBackground`. Kept for DynamicSheet / config callers. */
+export type SheetBgIntensity =
+  | '50'
+  | '100'
+  | '200'
+  | '300'
+  | '400'
+  | '500'
+  | '600'
+  | '700'
+  | '800'
+  | '900'
+  | '950';
 
 export interface SheetAction {
-  id: string;
+  id?: string;
   label: string;
   variant?: ButtonVariant;
   type?: 'button' | 'submit' | 'reset';
@@ -55,12 +86,41 @@ export interface SheetAction {
   closeOnClick?: boolean;
 }
 
+export interface SheetProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
+  triggerText?: string;
+  triggerVariant?: ButtonVariant;
+  title?: string;
+  description?: string;
+  children?: React.ReactNode;
+  actions?: SheetAction[];
+  showCloseButton?: boolean;
+  closeOnOverlayClick?: boolean;
+  closeOnEscape?: boolean;
+  showHeader?: boolean;
+  showFooter?: boolean;
+  side?: SheetSide;
+  size?: SheetSize;
+  type?: SheetType;
+  background?: SheetBackground;
+  customBgColor?: string;
+  loading?: boolean;
+  disabled?: boolean;
+  className?: string;
+  contentClassName?: string;
+  headerClassName?: string;
+  footerClassName?: string;
+  onActionClick?: (actionId: string) => void;
+}
+
 export interface SheetConfig {
   id: string;
   title: string;
   description?: string;
-  side?: 'top' | 'bottom' | 'left' | 'right';
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  side?: SheetSide;
+  size?: SheetSize;
   actions?: SheetAction[];
   content?: React.ReactNode;
   className?: string;
@@ -69,7 +129,10 @@ export interface SheetConfig {
   closeOnEscape?: boolean;
   showHeader?: boolean;
   showFooter?: boolean;
+  background?: SheetBackground;
+  /** @deprecated Prefer `background`. */
   backgroundColor?: SheetBgColor;
+  /** @deprecated Prefer `background`. */
   backgroundIntensity?: SheetBgIntensity;
   customBgColor?: string;
 }
@@ -83,267 +146,374 @@ export interface DynamicSheetProps {
   className?: string;
 }
 
-// Predefined Sheet Configurations
-const SHEET_CONFIGS = {
+const BACKGROUND_CLASSES: Record<SheetBackground, string> = {
+  default: 'bg-white dark:bg-gray-950',
+  white: 'bg-white',
+  muted: 'bg-gray-50 dark:bg-gray-900',
+  glass: 'bg-white/10 backdrop-blur-md border border-white/20',
+  gradient: 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950',
+  blue: 'bg-blue-50 dark:bg-blue-950',
+  yellow: 'bg-yellow-50 dark:bg-yellow-950',
+  gray: 'bg-gray-50 dark:bg-gray-900',
+  red: 'bg-red-50 dark:bg-red-950',
+  green: 'bg-green-50 dark:bg-green-950',
+  purple: 'bg-purple-50 dark:bg-purple-950',
+};
+
+const LEGACY_BG_MAP: Partial<Record<SheetBgColor, SheetBackground>> = {
+  white: 'white',
+  gray: 'gray',
+  slate: 'muted',
+  zinc: 'muted',
+  neutral: 'muted',
+  stone: 'muted',
+  red: 'red',
+  orange: 'yellow',
+  amber: 'yellow',
+  yellow: 'yellow',
+  lime: 'green',
+  green: 'green',
+  emerald: 'green',
+  teal: 'blue',
+  cyan: 'blue',
+  sky: 'blue',
+  blue: 'blue',
+  indigo: 'purple',
+  violet: 'purple',
+  purple: 'purple',
+  fuchsia: 'purple',
+  pink: 'red',
+  rose: 'red',
+  transparent: 'default',
+  glass: 'glass',
+  gradient: 'gradient',
+};
+
+const TYPE_CONFIGS: Record<
+  SheetType,
+  {
+    title: string;
+    description: string;
+    side: SheetSide;
+    size: SheetSize;
+    background: SheetBackground;
+    actions: SheetAction[];
+  }
+> = {
+  default: {
+    title: 'Sheet',
+    description: '',
+    side: 'right',
+    size: 'md',
+    background: 'default',
+    actions: [{ id: 'close', label: 'Close', variant: 'outline', closeOnClick: true }],
+  },
   info: {
-    id: 'info',
     title: 'Information',
     description: 'This is an informational sheet.',
-    side: 'right' as const,
-    size: 'md' as const,
-    backgroundColor: 'blue' as const,
-    backgroundIntensity: '50' as const,
-    content: (
-      <div className="py-4 space-y-4">
-        <div className="p-4 bg-blue-50 rounded-lg">
-          <h4 className="font-semibold text-blue-900">Information</h4>
-          <p className="text-blue-700 text-sm mt-1">
-            This is a simple informational sheet with custom content.
-          </p>
-        </div>
-      </div>
-    ),
-    actions: [
-      {
-        id: 'ok',
-        label: 'OK',
-        variant: 'primary' as const,
-        type: 'button' as const,
-        closeOnClick: true,
-      },
-    ],
+    side: 'right',
+    size: 'md',
+    background: 'blue',
+    actions: [{ id: 'ok', label: 'OK', variant: 'primary', closeOnClick: true }],
   },
   confirmation: {
-    id: 'confirmation',
     title: 'Confirm Action',
     description: 'Are you sure you want to proceed? This action cannot be undone.',
-    side: 'top' as const,
-    size: 'sm' as const,
-    backgroundColor: 'yellow' as const,
-    backgroundIntensity: '50' as const,
-    content: (
-      <div className="py-4">
-        <div className="flex items-center space-x-2 text-yellow-600">
-          <span className="text-lg">⚠️</span>
-          <p className="text-sm">Are you sure you want to proceed?</p>
-        </div>
-      </div>
-    ),
+    side: 'top',
+    size: 'sm',
+    background: 'yellow',
     actions: [
-      {
-        id: 'confirm',
-        label: 'Confirm',
-        variant: 'destructive' as const,
-        type: 'button' as const,
-        closeOnClick: true,
-      },
-      {
-        id: 'cancel',
-        label: 'Cancel',
-        variant: 'outline' as const,
-        type: 'button' as const,
-        closeOnClick: true,
-      },
+      { id: 'confirm', label: 'Confirm', variant: 'destructive', closeOnClick: true },
+      { id: 'cancel', label: 'Cancel', variant: 'outline', closeOnClick: true },
     ],
   },
   settings: {
-    id: 'settings',
     title: 'Settings',
     description: 'Configure your application settings.',
-    side: 'right' as const,
-    size: 'lg' as const,
-    backgroundColor: 'gray' as const,
-    backgroundIntensity: '50' as const,
-    content: (
-      <div className="py-4 space-y-6">
-        <div className="space-y-4">
-          <h4 className="font-semibold">Appearance</h4>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Dark Mode</span>
-              <input type="checkbox" className="rounded" />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Notifications</span>
-              <input type="checkbox" className="rounded" defaultChecked />
-            </div>
-          </div>
-        </div>
-        <div className="space-y-4">
-          <h4 className="font-semibold">Privacy</h4>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Analytics</span>
-              <input type="checkbox" className="rounded" />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Crash Reports</span>
-              <input type="checkbox" className="rounded" defaultChecked />
-            </div>
-          </div>
-        </div>
-      </div>
-    ),
+    side: 'right',
+    size: 'lg',
+    background: 'gray',
     actions: [
-      {
-        id: 'save',
-        label: 'Save',
-        variant: 'primary' as const,
-        type: 'button' as const,
-        closeOnClick: true,
-      },
-      {
-        id: 'cancel',
-        label: 'Cancel',
-        variant: 'outline' as const,
-        type: 'button' as const,
-        closeOnClick: true,
-      },
+      { id: 'save', label: 'Save', variant: 'primary', closeOnClick: true },
+      { id: 'cancel', label: 'Cancel', variant: 'outline', closeOnClick: true },
     ],
   },
 };
 
-// Utility Functions
-const getSizeClasses = (size: string) => {
-  switch (size) {
-    case 'sm':
-      return 'sm:max-w-sm';
-    case 'md':
-      return 'sm:max-w-md';
-    case 'lg':
-      return 'sm:max-w-lg';
-    case 'xl':
-      return 'sm:max-w-xl';
-    case 'full':
-      return 'sm:max-w-full';
-    default:
-      return 'sm:max-w-md';
-  }
-};
-
-const getBackgroundClasses = (backgroundColor?: SheetBgColor, backgroundIntensity?: SheetBgIntensity, customBgColor?: string) => {
-  // Handle special cases first
-  if (backgroundColor === 'transparent') {
-    return 'bg-transparent';
-  }
-  
-  if (backgroundColor === 'glass') {
-    return 'bg-white/10 backdrop-blur-md border border-white/20';
-  }
-  
-  if (backgroundColor === 'gradient') {
-    return 'bg-gradient-to-br from-blue-50 to-purple-50';
-  }
-  
-  if (backgroundColor === 'white') {
-    return 'bg-white';
-  }
-  
-  // Handle custom color
+function resolveBackground(
+  background?: SheetBackground,
+  backgroundColor?: SheetBgColor,
+  customBgColor?: string
+): { className: string; style?: React.CSSProperties; hasCustom: boolean } {
   if (customBgColor) {
-    return '';
+    return { className: '', style: { backgroundColor: customBgColor }, hasCustom: true };
   }
-  
-  // Handle all other colors with intensity
-  if (backgroundColor && backgroundIntensity) {
-    return `bg-${backgroundColor}-${backgroundIntensity}`;
+  if (background) {
+    return {
+      className: BACKGROUND_CLASSES[background],
+      hasCustom: background !== 'default',
+    };
   }
-  
-  // Default fallback
-  return 'bg-background';
-};
+  if (backgroundColor) {
+    const mapped = LEGACY_BG_MAP[backgroundColor] ?? 'default';
+    return {
+      className: BACKGROUND_CLASSES[mapped],
+      hasCustom: mapped !== 'default',
+    };
+  }
+  return { className: BACKGROUND_CLASSES.default, hasCustom: false };
+}
 
-// Main Dynamic Sheet Component
-function DynamicSheet({ 
-  config, 
-  trigger, 
-  open, 
-  onOpenChange, 
+const Sheet: React.FC<SheetProps> = React.memo(
+  ({
+    open,
+    onOpenChange,
+    trigger,
+    triggerText = 'Open Sheet',
+    triggerVariant = 'outline',
+    title,
+    description,
+    children,
+    actions,
+    showCloseButton = true,
+    closeOnOverlayClick = true,
+    closeOnEscape = true,
+    showHeader = true,
+    showFooter = true,
+    side,
+    size,
+    type = 'default',
+    background,
+    customBgColor,
+    loading = false,
+    disabled = false,
+    className,
+    contentClassName,
+    headerClassName,
+    footerClassName,
+    onActionClick,
+  }) => {
+    const [isOpen, setIsOpen] = React.useState(open ?? false);
+    const preset = TYPE_CONFIGS[type];
+
+    React.useEffect(() => {
+      if (open !== undefined) setIsOpen(open);
+    }, [open]);
+
+    const finalTitle = title ?? preset.title;
+    const finalDescription = description ?? preset.description;
+    const finalActions = actions ?? preset.actions;
+    const finalSide = side ?? preset.side;
+    const finalSize = size ?? preset.size;
+    const bg = resolveBackground(background ?? preset.background, undefined, customBgColor);
+
+    const handleOpenChange = React.useCallback(
+      (next: boolean) => {
+        setIsOpen(next);
+        onOpenChange?.(next);
+      },
+      [onOpenChange]
+    );
+
+    const handleActionClick = React.useCallback(
+      (action: SheetAction) => {
+        action.onClick?.();
+        if (action.id) onActionClick?.(action.id);
+        if (action.closeOnClick !== false) {
+          handleOpenChange(false);
+        }
+      },
+      [handleOpenChange, onActionClick]
+    );
+
+    const handlePointerDownOutside = React.useCallback(
+      (event: Event) => {
+        if (!closeOnOverlayClick) event.preventDefault();
+      },
+      [closeOnOverlayClick]
+    );
+
+    const handleEscapeKeyDown = React.useCallback(
+      (event: KeyboardEvent) => {
+        if (!closeOnEscape) event.preventDefault();
+      },
+      [closeOnEscape]
+    );
+
+    const triggerElement = trigger ? (
+      <SheetTrigger asChild>{trigger}</SheetTrigger>
+    ) : (
+      <SheetTrigger asChild>
+        <Button variant={triggerVariant} disabled={disabled}>
+          {triggerText}
+        </Button>
+      </SheetTrigger>
+    );
+
+    return (
+      <SheetComp open={isOpen} onOpenChange={handleOpenChange}>
+        {triggerElement}
+        <SheetContent
+          side={finalSide}
+          size={finalSize}
+          showCloseButton={showCloseButton}
+          hasCustomBackground={bg.hasCustom}
+          className={cn(bg.className, contentClassName, className)}
+          style={bg.style}
+          onPointerDownOutside={handlePointerDownOutside}
+          onEscapeKeyDown={handleEscapeKeyDown}
+        >
+          {showHeader ? (
+            <SheetHeader className={headerClassName}>
+              <SheetTitle>{finalTitle}</SheetTitle>
+              {finalDescription ? (
+                <SheetDescription>{finalDescription}</SheetDescription>
+              ) : null}
+            </SheetHeader>
+          ) : null}
+
+          {children ? <div className="flex-1 py-2">{children}</div> : null}
+
+          {showFooter && finalActions.length > 0 ? (
+            <SheetFooter className={footerClassName}>
+              {finalActions.map((action, index) => (
+                <Button
+                  key={action.id ?? `${action.label}-${index}`}
+                  type={action.type ?? 'button'}
+                  variant={action.variant ?? 'primary'}
+                  disabled={action.disabled || disabled || loading}
+                  className={loading ? 'opacity-50' : undefined}
+                  onClick={() => handleActionClick(action)}
+                >
+                  {action.label}
+                </Button>
+              ))}
+            </SheetFooter>
+          ) : null}
+        </SheetContent>
+      </SheetComp>
+    );
+  }
+);
+
+Sheet.displayName = 'Sheet';
+
+function DynamicSheet({
+  config,
+  trigger,
+  open,
+  onOpenChange,
   onActionClick,
-  className 
+  className,
 }: DynamicSheetProps) {
-  const sizeClasses = useMemo(() => getSizeClasses(config.size || 'md'), [config.size]);
-  const backgroundClasses = useMemo(() => getBackgroundClasses(config.backgroundColor, config.backgroundIntensity, config.customBgColor), [config.backgroundColor, config.backgroundIntensity, config.customBgColor]);
-
-  const defaultTrigger = useMemo(() => (
-    <Button variant="outline">
-      Open {config.title}
-    </Button>
-  ), [config.title]);
-
-  const handleActionClick = useCallback((action: SheetAction) => {
-    // Call the action's onClick handler if provided
-    action.onClick?.();
-    
-    // Call the global action click handler
-    onActionClick?.(action.id);
-    
-    // Close the sheet if closeOnClick is true
-    if (action.closeOnClick) {
-      onOpenChange?.(false);
-    }
-  }, [onActionClick, onOpenChange]);
+  const mappedBackground =
+    config.background ??
+    (config.backgroundColor ? LEGACY_BG_MAP[config.backgroundColor] : undefined);
 
   return (
-    <SheetComp open={open} onOpenChange={onOpenChange}>
-      <SheetTrigger asChild>
-        {trigger || defaultTrigger}
-      </SheetTrigger>
-      <SheetContent 
-        side={config.side || 'right'}
-        className={cn(sizeClasses, backgroundClasses, config.className, className)}
-        style={config.customBgColor ? { backgroundColor: config.customBgColor } : undefined}
-        hasCustomBackground={!!(config.backgroundColor || config.customBgColor)}
-      >
-        {config.showHeader !== false && (
-          <SheetHeader>
-            <SheetTitle>{config.title}</SheetTitle>
-            {config.description && (
-              <SheetDescription>{config.description}</SheetDescription>
-            )}
-          </SheetHeader>
-        )}
-        
-        <div className="flex-1">
-          {config.content}
-        </div>
-        
-        {config.showFooter !== false && config.actions && config.actions.length > 0 && (
-          <SheetFooter>
-            {config.actions.map((action) => (
-              <Button
-                key={action.id}
-                type={action.type || 'button'}
-                variant={action.variant || 'primary'}
-                disabled={action.disabled}
-                onClick={() => handleActionClick(action)}
-              >
-                {action.label}
-              </Button>
-            ))}
-          </SheetFooter>
-        )}
-      </SheetContent>
-    </SheetComp>
+    <Sheet
+      open={open}
+      onOpenChange={onOpenChange}
+      trigger={trigger}
+      triggerText={`Open ${config.title}`}
+      title={config.title}
+      description={config.description}
+      side={config.side}
+      size={config.size}
+      actions={config.actions}
+      showCloseButton={config.showClose !== false}
+      closeOnOverlayClick={config.closeOnOverlayClick !== false}
+      closeOnEscape={config.closeOnEscape !== false}
+      showHeader={config.showHeader !== false}
+      showFooter={config.showFooter !== false}
+      background={mappedBackground}
+      customBgColor={config.customBgColor}
+      onActionClick={onActionClick}
+      className={cn(config.className, className)}
+    >
+      {config.content}
+    </Sheet>
   );
 }
 
-// Convenience function to create sheet from config
+DynamicSheet.displayName = 'DynamicSheet';
+
 function createSheet(config: SheetConfig) {
   return (props: Omit<DynamicSheetProps, 'config'>) => (
     <DynamicSheet {...props} config={config} />
   );
 }
 
-// Pre-configured Sheet Components
-const InfoSheet = createSheet(SHEET_CONFIGS.info);
-const SettingsSheet = createSheet(SHEET_CONFIGS.settings);
-const ConfirmationSheet = createSheet(SHEET_CONFIGS.confirmation);
+const InfoSheet = createSheet({
+  id: 'info',
+  title: 'Information',
+  description: 'This is an informational sheet.',
+  side: 'right',
+  size: 'md',
+  background: 'blue',
+  content: (
+    <div className="space-y-4 py-4">
+      <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-950">
+        <h4 className="font-semibold text-blue-900 dark:text-blue-100">Information</h4>
+        <p className="mt-1 text-sm text-blue-700 dark:text-blue-200">
+          This is a simple informational sheet with custom content.
+        </p>
+      </div>
+    </div>
+  ),
+  actions: [{ id: 'ok', label: 'OK', variant: 'primary', closeOnClick: true }],
+});
 
-// Legacy Sheet component for backward compatibility
-function Sheet() {
-  return <DynamicSheet config={SHEET_CONFIGS.info} />;
-}
+const ConfirmationSheet = createSheet({
+  id: 'confirmation',
+  title: 'Confirm Action',
+  description: 'Are you sure you want to proceed? This action cannot be undone.',
+  side: 'top',
+  size: 'sm',
+  background: 'yellow',
+  content: (
+    <div className="py-4">
+      <p className="text-sm text-yellow-700 dark:text-yellow-200">
+        Are you sure you want to proceed?
+      </p>
+    </div>
+  ),
+  actions: [
+    { id: 'confirm', label: 'Confirm', variant: 'destructive', closeOnClick: true },
+    { id: 'cancel', label: 'Cancel', variant: 'outline', closeOnClick: true },
+  ],
+});
+
+const SettingsSheet = createSheet({
+  id: 'settings',
+  title: 'Settings',
+  description: 'Configure your application settings.',
+  side: 'right',
+  size: 'lg',
+  background: 'gray',
+  content: (
+    <div className="space-y-6 py-4">
+      <div className="space-y-2">
+        <h4 className="font-semibold">Appearance</h4>
+        <label className="flex items-center justify-between text-sm">
+          Dark Mode
+          <input type="checkbox" className="rounded" />
+        </label>
+      </div>
+      <div className="space-y-2">
+        <h4 className="font-semibold">Privacy</h4>
+        <label className="flex items-center justify-between text-sm">
+          Analytics
+          <input type="checkbox" className="rounded" />
+        </label>
+      </div>
+    </div>
+  ),
+  actions: [
+    { id: 'save', label: 'Save', variant: 'primary', closeOnClick: true },
+    { id: 'cancel', label: 'Cancel', variant: 'outline', closeOnClick: true },
+  ],
+});
 
 export {
   Sheet,
@@ -362,4 +532,6 @@ export {
   SheetPortal,
   SheetTitle,
   SheetTrigger,
+  BACKGROUND_CLASSES as SHEET_BACKGROUND_CLASSES,
+  TYPE_CONFIGS as SHEET_TYPE_CONFIGS,
 };

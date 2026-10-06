@@ -119,12 +119,31 @@ export {
 } from './Form';
 
 export { Grid } from './Grid';
+export type {
+  GridAlign,
+  GridColumns,
+  GridGap,
+  GridProps,
+  GridVariant,
+} from './Grid';
 
 export { Input, Input2 } from './Input';
+export type { InputProps, InputSize, InputVariant } from './Input';
 
-export { Label } from './Label';
+export { Label, labelVariants } from './Label';
+export type { LabelProps, LabelSize, LabelVariant, LabelWeight } from './Label';
 
 export { IconUnOrderList, List, OrderList, UnOrderList } from './List';
+export type {
+  iListArray,
+  ListItem,
+  ListProps,
+  ListSize,
+  ListSpacing,
+  ListVariant,
+  OrderListProps,
+  UnOrderListProps,
+} from './List';
 
 export {
   Popover,
@@ -133,7 +152,18 @@ export {
   PopoverTrigger,
 } from './Popover';
 
+export type {
+  iPopover,
+  PopoverAlign,
+  PopoverOpenOn,
+  PopoverProps,
+  PopoverSide,
+  PopoverSize,
+  PopoverVariant,
+} from './Popover';
+
 export { Progress, ProgressComp } from './Progress';
+export type { iProgress, ProgressProps, ProgressSize, ProgressVariant } from './Progress';
 
 export {
   Pagination,
@@ -146,15 +176,47 @@ export {
   PaginationPrevious,
 } from './Pagination';
 
-export type { PaginationProps } from './Pagination';
+export type { PaginationProps, PaginationSize, PaginationVariant } from './Pagination';
 
 export { RadioGroup, RadioGroupComp, RadioGroupItem } from './RadioGroup';
+export type {
+  iRadioGroup,
+  iRadioGroupItem,
+  RadioGroupOrientation,
+  RadioGroupProps,
+  RadioGroupSize,
+  RadioGroupVariant,
+} from './RadioGroup';
 
 export { ScrollArea, ScrollAreaComp, ScrollBar } from './ScrollArea';
+export type {
+  ScrollAreaOrientation,
+  ScrollAreaProps,
+  ScrollAreaSize,
+  ScrollAreaVariant,
+} from './ScrollArea';
 
 export { Select, SelectComp, SelectItems } from './Select';
+export type {
+  iSelect,
+  iSelectItems,
+  SelectCompProps,
+  SelectItemsProps,
+  SelectProps,
+  SelectSize,
+  SelectVariant,
+} from './Select';
 
 export { Separator, SeparatorComp } from './Separator';
+export type {
+  iSeparator,
+  SeparatorColor,
+  SeparatorCompProps,
+  SeparatorOrientation,
+  SeparatorProps,
+  SeparatorSize,
+  SeparatorVariant,
+} from './Separator';
 
 export {
   Sheet,
@@ -168,23 +230,96 @@ export {
   SheetPortal,
   SheetTitle,
   SheetTrigger,
+  DynamicSheet,
+  InfoSheet,
+  SettingsSheet,
+  ConfirmationSheet,
+  createSheet,
+} from './Sheet';
+export type {
+  DynamicSheetProps,
+  SheetAction,
+  SheetBackground,
+  SheetBgColor,
+  SheetBgIntensity,
+  SheetConfig,
+  SheetProps,
+  SheetSide,
+  SheetSize,
+  SheetType,
 } from './Sheet';
 
 export { Skeleton, SkeletonComp } from './Skeleton';
+export type {
+  iSkeleton,
+  SkeletonAnimation,
+  SkeletonColor,
+  SkeletonColorIntensity,
+  SkeletonProps,
+  SkeletonSize,
+  SkeletonVariant,
+} from './Skeleton';
 
-export { Slider, SliderComp } from './Slider';
-
-export { Sonner, SonnerComp, clearAllToasts as clearAllSonnerToasts, createIsolatedToastState, toast as sonnerToast } from './Sonner';
-
-export { Switch, SwitchComp } from './Switch';
+export { Slider, SliderComp, LegacySlider } from './Slider';
+export type {
+  iSlider,
+  SliderOrientation,
+  SliderProps,
+  SliderSize,
+  SliderVariant,
+} from './Slider';
 
 export {
-  table,
-} from './Table';
+  Sonner,
+  SonnerComp,
+  ToastContainer,
+  ToastItem,
+  clearAllToasts as clearAllSonnerToasts,
+  createIsolatedToastState,
+  toast as sonnerToast,
+} from './Sonner';
+export type {
+  SonnerPosition,
+  SonnerProps,
+  SonnerSize,
+  SonnerToastAction,
+  SonnerToastProps,
+  SonnerToastRecord,
+  SonnerToastType,
+} from './Sonner';
+
+export { Switch, SwitchComp } from './Switch';
+export type {
+  SwitchCompProps,
+  SwitchLabelSide,
+  SwitchProps,
+  SwitchSize,
+  SwitchVariant,
+  iSwitch,
+} from './Switch';
+
+/** @deprecated Import `table` from `@dashflowx/datagrid` (G02). */
+export { Table, table } from './Table';
+export type { TableProps, TableSize, TableVariant, iTable } from './Table';
 
 export { Tabs, TabsComp, TabsContent, TabsList, TabsTrigger } from './Tabs';
+export type {
+  TabsOrientation,
+  TabsProps,
+  TabsSize,
+  TabsVariant,
+  iTabs,
+  iTabsItem,
+} from './Tabs';
 
 export { TextArea } from './TextArea';
+export type {
+  TextAreaProps,
+  TextAreaResize,
+  TextAreaSize,
+  TextAreaVariant,
+  iTextArea,
+} from './TextArea';
 
 export {
   Toast,
@@ -196,13 +331,37 @@ export {
   ToastProviderWrapper,
   ToastTitle,
   ToastViewport,
+  toastSurfaceClass,
+  TOAST_SURFACE,
   type ToastActionElement,
+  type ToastActionConfig,
+  type ToastBgColor,
+  type ToastBgIntensity,
   type ToastProps,
+  type ToastRootProps,
+  type ToastSize,
+  type ToastVariant,
+  type DynamicToastProps,
+  type iToast,
 } from './Toast';
 
 export { Toaster, ToasterComp } from './Toaster';
+export type {
+  DynamicToasterProps,
+  iToaster,
+  ToasterCompProps,
+  ToasterPosition,
+  ToasterProps,
+} from './Toaster';
 
 export { Toggle } from './Toggle';
+export type {
+  ToggleLabelSide,
+  ToggleProps,
+  ToggleSize,
+  ToggleVariant,
+  iToggle,
+} from './Toggle';
 
 export {
   ToggleComp,
@@ -210,6 +369,17 @@ export {
   ToggleGroupComp,
   ToggleGroupItem,
   toggleVariants,
+} from './ToggleGroup';
+export type {
+  ToggleCompProps,
+  ToggleGroupCompProps,
+  ToggleGroupItemProps,
+  ToggleGroupOrientation,
+  ToggleGroupProps,
+  ToggleGroupSize,
+  ToggleGroupVariant,
+  iToggleGroup,
+  iToggleGroupItem,
 } from './ToggleGroup';
 
 export {
@@ -219,45 +389,137 @@ export {
   TooltipProvider,
   TooltipTrigger,
 } from './Tooltip';
+export type {
+  TooltipAlign,
+  TooltipProps,
+  TooltipSide,
+  TooltipSize,
+  TooltipVariant,
+  iTooltip,
+} from './Tooltip';
 
 export { Typography, TypographyComp } from './Typography';
+export type {
+  HeroOneProps,
+  TypographyAlign,
+  TypographyEmphasis,
+  TypographyProps,
+  TypographySize,
+  TypographyTone,
+  TypographyVariant,
+  TypographyWeight,
+  iTypography,
+} from './Typography';
 
 export { toast, useToast } from '../lib/use-toast';
 
-export {a} from './a';
+export { Anchor, a } from './Anchor';
+export type {
+  AnchorProps,
+  AnchorSize,
+  AnchorUnderline,
+  AnchorVariant,
+  AnchorWeight,
+} from './Anchor';
 
 export { code } from './Code';
 
 export { CopyButton } from './CopyButton';
 
-export { h1 } from './H1';
+export { H1, h1 } from './H1';
+export type {
+  H1Align,
+  H1Props,
+  H1Size,
+  H1Variant,
+  H1Weight,
+} from './H1';
 
-export { h2 } from './H2';
+export { H2, h2 } from './H2';
+export type {
+  H2Align,
+  H2Props,
+  H2Size,
+  H2Variant,
+  H2Weight,
+} from './H2';
 
-export { h3 } from './H3';
+export { H3, h3 } from './H3';
+export type {
+  H3Align,
+  H3Props,
+  H3Size,
+  H3Variant,
+  H3Weight,
+} from './H3';
 
-export { h4 } from './H4';
+export { H4, h4 } from './H4';
+export type {
+  H4Align,
+  H4Props,
+  H4Size,
+  H4Variant,
+  H4Weight,
+} from './H4';
 
-export { h5 } from './H5';
+export { H5, h5 } from './H5';
+export type {
+  H5Align,
+  H5Props,
+  H5Size,
+  H5Variant,
+  H5Weight,
+} from './H5';
 
-export { h6 } from './H6';
+export { H6, h6 } from './H6';
+export type {
+  H6Align,
+  H6Props,
+  H6Size,
+  H6Variant,
+  H6Weight,
+} from './H6';
 
-export { hr } from './Hr';
+export { Hr, hr } from './Hr';
+export type {
+  HrProps,
+  HrSpacing,
+  HrThickness,
+  HrVariant,
+} from './Hr';
 
-export { img } from './Img';
+export { Img, img } from './Img';
+export type {
+  ImgFit,
+  ImgProps,
+  ImgRounded,
+  ImgSize,
+  ImgVariant,
+} from './Img';
 
-export { li } from './Li';
+export { Li, li } from './Li';
+export type { LiProps, LiSize, LiSpacing, LiVariant } from './Li';
 
-export { ol } from './Ol';
+export { Ol, ol } from './Ol';
+export type { OlIndent, OlProps, OlSize, OlSpacing, OlVariant } from './Ol';
 
-export { p } from './P';
+export { P, p } from './P';
+export type { PAlign, PProps, PSize, PVariant, PWeight } from './P';
 
-export { pre } from './Pre';
+export { Pre, pre } from './Pre';
+export type { PreNpmCommands, PreProps, PreSize, PreStyle, PreVariant } from './Pre';
 
-export { td } from './Td';
+/** @deprecated Import `td` from `@dashflowx/datagrid` (G02). */
+export { Td, td } from './Td';
+export type { TdAlign, TdProps, TdSize, TdVariant, iTd } from './Td';
 
-export { th } from './Th';
+/** @deprecated Import `th` from `@dashflowx/datagrid` (G02). */
+export { Th, th } from './Th';
+export type { ThAlign, ThProps, ThSize, ThVariant, iTh } from './Th';
 
-export { tr } from './Tr';
+/** @deprecated Import `tr` from `@dashflowx/datagrid` (G02). */
+export { Tr, tr } from './Tr';
+export type { TrProps, TrSize, TrVariant, iTr } from './Tr';
 
-export { ul } from './Ul';
+export { Ul, ul } from './Ul';
+export type { UlIndent, UlProps, UlSize, UlSpacing, UlVariant } from './Ul';

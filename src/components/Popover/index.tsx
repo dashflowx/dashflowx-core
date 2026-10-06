@@ -1,20 +1,63 @@
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
-// Completely standalone HTML/CSS Popover for Markdoc compatibility
-// No Radix UI, no external dependencies, pure HTML/CSS implementation
+export type PopoverVariant = 'default' | 'muted' | 'bordered' | 'soft' | 'dark';
+export type PopoverSize = 'sm' | 'md' | 'lg';
+export type PopoverAlign = 'start' | 'center' | 'end';
+export type PopoverSide = 'top' | 'bottom' | 'left' | 'right';
+export type PopoverOpenOn = 'hover' | 'click';
 
-// Simple utility function
-function cn(...classes: (string | undefined | null | false)[]): string {
-  return classes.filter(Boolean).join(' ');
-}
-
-interface iPopover {
-  popoverTrigger: JSX.Element;
-  popoverContent: JSX.Element;
+/** @deprecated Prefer `PopoverProps`. Kept for existing `iPopover` imports. */
+export interface iPopover {
+  popoverTrigger: React.ReactNode;
+  popoverContent: React.ReactNode;
   triggerClassName?: string;
   contentClassName?: string;
-  align?: string;
+  className?: string;
+  align?: PopoverAlign;
+  side?: PopoverSide;
   sideOffset?: number;
+  variant?: PopoverVariant;
+  size?: PopoverSize;
+  openOn?: PopoverOpenOn;
+  open?: boolean;
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  disabled?: boolean;
+}
+
+export type PopoverProps = iPopover;
+
+const VARIANT_CLASSES: Record<PopoverVariant, string> = {
+  default: 'border bg-white text-gray-900 shadow-md',
+  muted: 'border border-gray-200 bg-gray-50 text-gray-700 shadow-sm',
+  bordered: 'border-2 border-gray-800 bg-white text-gray-900 shadow-sm',
+  soft: 'border border-blue-100 bg-blue-50 text-blue-900 shadow-sm',
+  dark: 'border border-gray-700 bg-gray-900 text-white shadow-lg',
+};
+
+const SIZE_CLASSES: Record<PopoverSize, string> = {
+  sm: 'w-56 p-3 text-sm',
+  md: 'w-80 p-4 text-sm',
+  lg: 'w-96 p-5 text-base',
+};
+
+function alignClasses(side: PopoverSide, align: PopoverAlign): string {
+  if (side === 'top' || side === 'bottom') {
+    if (align === 'start') return 'left-0';
+    if (align === 'end') return 'right-0';
+    return 'left-1/2 -translate-x-1/2';
+  }
+  if (align === 'start') return 'top-0';
+  if (align === 'end') return 'bottom-0';
+  return 'top-1/2 -translate-y-1/2';
+}
+
+function sideStyle(side: PopoverSide, sideOffset: number): React.CSSProperties {
+  if (side === 'top') return { bottom: `calc(100% + ${sideOffset}px)` };
+  if (side === 'left') return { right: `calc(100% + ${sideOffset}px)` };
+  if (side === 'right') return { left: `calc(100% + ${sideOffset}px)` };
+  return { top: `calc(100% + ${sideOffset}px)` };
 }
 
 function Popover({
@@ -22,41 +65,87 @@ function Popover({
   popoverContent,
   triggerClassName = '',
   contentClassName = '',
+  className,
   align = 'center',
+  side = 'bottom',
   sideOffset = 4,
-}: iPopover) {
-  // Get alignment classes
-  const getAlignmentClasses = () => {
-    switch (align) {
-      case 'start':
-        return 'left-0';
-      case 'end':
-        return 'right-0';
-      case 'center':
-      default:
-        return 'left-1/2 transform -translate-x-1/2';
-    }
-  };
+  variant = 'default',
+  size = 'md',
+  openOn = 'hover',
+  open: openProp,
+  defaultOpen = false,
+  onOpenChange,
+  disabled = false,
+}: PopoverProps) {
+  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen);
+  const isControlled = openProp !== undefined;
+  const open = isControlled ? openProp : uncontrolledOpen;
+  const rootRef = React.useRef<HTMLDivElement>(null);
+
+  const setOpen = React.useCallback(
+    (next: boolean) => {
+      if (disabled) return;
+      if (!isControlled) setUncontrolledOpen(next);
+      onOpenChange?.(next);
+    },
+    [disabled, isControlled, onOpenChange]
+  );
+
+  React.useEffect(() => {
+    if (openOn !== 'click' || !open) return;
+    const onPointerDown = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onPointerDown);
+    return () => document.removeEventListener('mousedown', onPointerDown);
+  }, [open, openOn, setOpen]);
+
+  const visible =
+    !disabled &&
+    (openOn === 'hover'
+      ? undefined
+      : open);
 
   return (
-    <div className="relative inline-block group">
-      {/* Trigger */}
-      <div className={cn('cursor-pointer', triggerClassName)}>
+    <div
+      ref={rootRef}
+      className={cn(
+        'relative inline-block',
+        openOn === 'hover' && !disabled ? 'group' : '',
+        className
+      )}
+    >
+      <div
+        className={cn(
+          'cursor-pointer',
+          disabled ? 'pointer-events-none opacity-50' : '',
+          triggerClassName
+        )}
+        onClick={() => {
+          if (openOn === 'click') setOpen(!open);
+        }}
+      >
         {popoverTrigger}
       </div>
 
-      {/* Content - shown on hover */}
       <div
         className={cn(
-          'absolute z-50 w-80 rounded-md border bg-white p-4 text-gray-900 shadow-md outline-none',
-          'opacity-0 invisible group-hover:opacity-100 group-hover:visible',
-          'transition-all duration-200',
-          getAlignmentClasses(),
+          'absolute z-50 rounded-md outline-none transition-all duration-200',
+          VARIANT_CLASSES[variant],
+          SIZE_CLASSES[size],
+          alignClasses(side, align),
+          openOn === 'hover'
+            ? 'invisible opacity-0 group-hover:visible group-hover:opacity-100'
+            : visible
+              ? 'visible opacity-100'
+              : 'invisible opacity-0 pointer-events-none',
           contentClassName
         )}
-        style={{
-          top: `calc(100% + ${sideOffset}px)`,
-        }}
+        style={sideStyle(side, sideOffset)}
+        role="dialog"
+        aria-hidden={openOn === 'click' ? !open : undefined}
       >
         {popoverContent}
       </div>
@@ -64,22 +153,39 @@ function Popover({
   );
 }
 
-// Create compatibility exports for other components that depend on these
-// These are simple wrappers that don't use Radix UI
-export const PopoverComp = ({ children }: { children: React.ReactNode }) => {
-  return <>{children}</>;
-};
+Popover.displayName = 'Popover';
 
-export const PopoverContent = ({ children, className, ...props }: any) => (
-  <div className={cn('w-80', className)} {...props}>
+export const PopoverComp = ({
+  children,
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn('relative inline-block', className)} {...props}>
     {children}
   </div>
 );
+PopoverComp.displayName = 'PopoverComp';
 
-export const PopoverTrigger = ({ children, className, ...props }: any) => (
-  <div className={className} {...props}>
+export const PopoverContent = ({
+  children,
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn('w-80 rounded-md border bg-white p-4 shadow-md', className)} {...props}>
     {children}
   </div>
 );
+PopoverContent.displayName = 'PopoverContent';
+
+export const PopoverTrigger = ({
+  children,
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn('cursor-pointer', className)} {...props}>
+    {children}
+  </div>
+);
+PopoverTrigger.displayName = 'PopoverTrigger';
 
 export { Popover };

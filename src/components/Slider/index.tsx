@@ -2,263 +2,194 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { SliderComp } from './SliderComp';
 
-// Type definitions
-export interface SliderProps {
-  // Basic props
+export type SliderSize = 'sm' | 'md' | 'lg';
+export type SliderVariant = 'default' | 'primary' | 'success' | 'warning' | 'error';
+export type SliderOrientation = 'horizontal' | 'vertical';
+
+export interface iSlider {
   value?: number[];
   defaultValue?: number[];
   min?: number;
   max?: number;
   step?: number;
-  
-  // Styling props
   className?: string;
   trackClassName?: string;
   rangeClassName?: string;
   thumbClassName?: string;
-  
-  // Behavior props
   disabled?: boolean;
-  orientation?: 'horizontal' | 'vertical';
+  orientation?: SliderOrientation;
   inverted?: boolean;
-  
-  // Display props
   showLabels?: boolean;
   showValue?: boolean;
   showTicks?: boolean;
   tickCount?: number;
   label?: string;
   valueLabel?: string;
-  
-  // Event handlers
   onValueChange?: (value: number[]) => void;
   onValueCommit?: (value: number[]) => void;
-  
-  // Size variants
-  size?: 'sm' | 'md' | 'lg';
-  
-  // Color variants
-  variant?: 'default' | 'primary' | 'success' | 'warning' | 'error';
+  size?: SliderSize;
+  variant?: SliderVariant;
 }
 
-// Size configuration
-const getSizeConfig = (size: SliderProps['size'] = 'md') => {
-  switch (size) {
-    case 'sm':
-      return {
-        trackHeight: 'h-1',
-        thumbSize: 'h-3 w-3',
-        spacing: 'space-y-1',
-      };
-    case 'lg':
-      return {
-        trackHeight: 'h-3',
-        thumbSize: 'h-6 w-6',
-        spacing: 'space-y-3',
-      };
-    case 'md':
-    default:
-      return {
-        trackHeight: 'h-2',
-        thumbSize: 'h-5 w-5',
-        spacing: 'space-y-2',
-      };
-  }
+export type SliderProps = iSlider;
+
+const SIZE_CONFIG: Record<
+  SliderSize,
+  { track: string; trackVertical: string; thumb: string; spacing: string }
+> = {
+  sm: {
+    track: 'h-1',
+    trackVertical: 'w-1',
+    thumb: 'h-3 w-3',
+    spacing: 'space-y-1',
+  },
+  md: {
+    track: 'h-2',
+    trackVertical: 'w-2',
+    thumb: 'h-5 w-5',
+    spacing: 'space-y-2',
+  },
+  lg: {
+    track: 'h-3',
+    trackVertical: 'w-3',
+    thumb: 'h-6 w-6',
+    spacing: 'space-y-3',
+  },
 };
 
-// Variant configuration
-const getVariantConfig = (variant: SliderProps['variant'] = 'default') => {
-  switch (variant) {
-    case 'primary':
-      return {
-        track: 'bg-blue-100',
-        range: 'bg-blue-600',
-        thumb: 'border-blue-600 bg-white',
-      };
-    case 'success':
-      return {
-        track: 'bg-green-100',
-        range: 'bg-green-600',
-        thumb: 'border-green-600 bg-white',
-      };
-    case 'warning':
-      return {
-        track: 'bg-yellow-100',
-        range: 'bg-yellow-500',
-        thumb: 'border-yellow-500 bg-white',
-      };
-    case 'error':
-      return {
-        track: 'bg-red-100',
-        range: 'bg-red-600',
-        thumb: 'border-red-600 bg-white',
-      };
-    case 'default':
-    default:
-      return {
-        track: 'bg-gray-200',
-        range: 'bg-gray-600',
-        thumb: 'border-gray-600 bg-white',
-      };
-  }
+const VARIANT_CONFIG: Record<
+  SliderVariant,
+  { track: string; range: string; thumb: string }
+> = {
+  default: {
+    track: 'bg-gray-200 dark:bg-gray-700',
+    range: 'bg-gray-600 dark:bg-gray-300',
+    thumb: 'border-gray-600 dark:border-gray-300 bg-white dark:bg-gray-950',
+  },
+  primary: {
+    track: 'bg-blue-100 dark:bg-blue-950',
+    range: 'bg-blue-600',
+    thumb: 'border-blue-600 bg-white dark:bg-gray-950',
+  },
+  success: {
+    track: 'bg-green-100 dark:bg-green-950',
+    range: 'bg-green-600',
+    thumb: 'border-green-600 bg-white dark:bg-gray-950',
+  },
+  warning: {
+    track: 'bg-yellow-100 dark:bg-yellow-950',
+    range: 'bg-yellow-500',
+    thumb: 'border-yellow-500 bg-white dark:bg-gray-950',
+  },
+  error: {
+    track: 'bg-red-100 dark:bg-red-950',
+    range: 'bg-red-600',
+    thumb: 'border-red-600 bg-white dark:bg-gray-950',
+  },
 };
 
-// Optimized Slider Component
-const Slider: React.FC<SliderProps> = React.memo(({
-  value,
-  defaultValue = [50],
-  min = 0,
-  max = 100,
-  step = 1,
-  className,
-  trackClassName,
-  rangeClassName,
-  thumbClassName,
-  disabled = false,
-  orientation = 'horizontal',
-  inverted = false,
-  showLabels = false,
-  showValue = false,
-  showTicks = false,
-  tickCount = 5,
-  label,
-  valueLabel,
-  onValueChange,
-  onValueCommit,
-  size = 'md',
-  variant = 'default',
-}) => {
-  // Get size and variant configurations
-  const sizeConfig = React.useMemo(() => getSizeConfig(size), [size]);
-  const variantConfig = React.useMemo(() => getVariantConfig(variant), [variant]);
+const Slider: React.FC<SliderProps> = React.memo(
+  ({
+    value,
+    defaultValue = [50],
+    min = 0,
+    max = 100,
+    step = 1,
+    className,
+    trackClassName,
+    rangeClassName,
+    thumbClassName,
+    disabled = false,
+    orientation = 'horizontal',
+    inverted = false,
+    showLabels = false,
+    showValue = false,
+    showTicks = false,
+    tickCount = 5,
+    label,
+    valueLabel,
+    onValueChange,
+    onValueCommit,
+    size = 'md',
+    variant = 'default',
+  }) => {
+    const sizeConfig = SIZE_CONFIG[size];
+    const variantConfig = VARIANT_CONFIG[variant];
+    const vertical = orientation === 'vertical';
 
-  // Generate tick marks
-  const ticks = React.useMemo(() => {
-    if (!showTicks) return [];
-    const tickValues = [];
-    const tickStep = (max - min) / (tickCount - 1);
-    for (let i = 0; i < tickCount; i++) {
-      tickValues.push(min + (tickStep * i));
-    }
-    return tickValues;
-  }, [showTicks, min, max, tickCount]);
+    const ticks = React.useMemo(() => {
+      if (!showTicks || tickCount < 2) return [];
+      const tickStep = (max - min) / (tickCount - 1);
+      return Array.from({ length: tickCount }, (_, i) =>
+        Math.round((min + tickStep * i) * 1000) / 1000
+      );
+    }, [showTicks, min, max, tickCount]);
 
-  // Handle value change
-  const handleValueChange = React.useCallback((newValue: number[]) => {
-    onValueChange?.(newValue);
-  }, [onValueChange]);
+    const displayValue = (value ?? defaultValue)[0] ?? 0;
 
-  // Handle value commit
-  const handleValueCommit = React.useCallback((newValue: number[]) => {
-    onValueCommit?.(newValue);
-  }, [onValueCommit]);
-
-  // Render tick marks
-  const renderTicks = () => {
-    if (!showTicks) return null;
-    
     return (
-      <div className="flex justify-between mt-1">
-        {ticks.map((tick, index) => (
-          <div
-            key={index}
-            className="text-xs text-gray-500 text-center"
-            style={{ width: `${100 / (tickCount - 1)}%` }}
-          >
-            {tick}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  // Render value display
-  const renderValueDisplay = () => {
-    if (!showValue) return null;
-    
-    const currentValue = value || defaultValue;
-    const displayValue = currentValue[0] || 0;
-    
-    return (
-      <div className="text-sm text-gray-600 font-medium">
-        {valueLabel || `${displayValue}`}
-      </div>
-    );
-  };
-
-  // Render label
-  const renderLabel = () => {
-    if (!showLabels || !label) return null;
-    
-    return (
-      <label className="text-sm font-medium text-gray-700">
-        {label}
-      </label>
-    );
-  };
-
-  return (
-    <div className={cn('w-full', sizeConfig.spacing, className)}>
-      {/* Label */}
-      {renderLabel()}
-      
-      {/* Value Display */}
-      {renderValueDisplay()}
-      
-      {/* Slider */}
-      <SliderComp
-        value={value}
-        defaultValue={defaultValue}
-        min={min}
-        max={max}
-        step={step}
-        disabled={disabled}
-        orientation={orientation}
-        inverted={inverted}
-        onValueChange={handleValueChange}
-        onValueCommit={handleValueCommit}
+      <div
         className={cn(
-          'relative flex w-full touch-none select-none items-center',
-          orientation === 'vertical' && 'flex-col h-64',
+          vertical ? 'inline-flex flex-col items-center' : 'w-full',
+          sizeConfig.spacing,
           className
         )}
       >
-        {/* Track */}
-        <div className={cn(
-          'relative w-full grow overflow-hidden rounded-full',
-          sizeConfig.trackHeight,
-          variantConfig.track,
-          trackClassName
-        )}>
-          {/* Range */}
-          <div className={cn(
-            'absolute h-full rounded-full',
-            variantConfig.range,
-            rangeClassName
-          )} />
-        </div>
-        
-        {/* Thumb */}
-        <div className={cn(
-          'block rounded-full border-2 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-          sizeConfig.thumbSize,
-          variantConfig.thumb,
-          thumbClassName
-        )} />
-      </SliderComp>
-      
-      {/* Tick Marks */}
-      {renderTicks()}
-    </div>
-  );
-});
+        {showLabels && label ? (
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
+            {label}
+          </label>
+        ) : null}
+
+        {showValue ? (
+          <div className="text-sm font-medium text-gray-600 dark:text-gray-300">
+            {valueLabel ?? String(displayValue)}
+          </div>
+        ) : null}
+
+        <SliderComp
+          value={value}
+          defaultValue={value === undefined ? defaultValue : undefined}
+          min={min}
+          max={max}
+          step={step}
+          disabled={disabled}
+          orientation={orientation}
+          inverted={inverted}
+          onValueChange={onValueChange}
+          onValueCommit={onValueCommit}
+          trackClassName={cn(
+            vertical ? sizeConfig.trackVertical : sizeConfig.track,
+            variantConfig.track,
+            trackClassName
+          )}
+          rangeClassName={cn(variantConfig.range, rangeClassName)}
+          thumbClassName={cn(sizeConfig.thumb, variantConfig.thumb, thumbClassName)}
+        />
+
+        {showTicks && ticks.length > 0 && !vertical ? (
+          <div className="mt-1 flex justify-between">
+            {ticks.map((tick, index) => (
+              <div
+                key={`${tick}-${index}`}
+                className="text-center text-xs text-gray-500 dark:text-gray-400"
+                style={{ width: `${100 / (tickCount - 1)}%` }}
+              >
+                {tick}
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+);
 
 Slider.displayName = 'Slider';
 
-// Legacy interface for backward compatibility
+/** Thin Radix slider without labels/ticks. Prefer `Slider`. */
 type LegacySliderProps = React.ComponentProps<typeof SliderComp>;
 
-// Legacy Slider function for backward compatibility
 function LegacySlider({ className, ...props }: LegacySliderProps) {
   return (
     <SliderComp
@@ -271,8 +202,10 @@ function LegacySlider({ className, ...props }: LegacySliderProps) {
   );
 }
 
-export { 
-  Slider, 
+export {
+  Slider,
   LegacySlider,
-  SliderComp 
+  SliderComp,
+  SIZE_CONFIG as SLIDER_SIZE_CONFIG,
+  VARIANT_CONFIG as SLIDER_VARIANT_CONFIG,
 };

@@ -1,31 +1,47 @@
 import { cn } from '@/lib/utils';
-import { ComponentPropsWithRef, forwardRef } from 'react';
+import { ComponentPropsWithRef, forwardRef, type ReactElement } from 'react';
 
-interface iListArray {
+export interface ListItem {
   id: number;
   content: string;
   className?: string;
-  icon?: JSX.Element;
-}
-interface iOrderListProps {
-  listArray?: Array<iListArray>;
-  listClassName?: string;
+  icon?: ReactElement;
 }
 
-export type OrderListProps = ComponentPropsWithRef<'ol'> & iOrderListProps;
+export type ListSize = 'sm' | 'md' | 'lg';
+export type ListSpacing = 'none' | 'sm' | 'md' | 'lg';
 
-interface iUnOrderListProps {
-  listArray?: Array<iListArray>;
+const SIZE_CLASSES: Record<ListSize, string> = {
+  sm: 'text-sm',
+  md: '',
+  lg: 'text-lg',
+};
+
+const SPACING_CLASSES: Record<ListSpacing, string> = {
+  none: 'space-y-0',
+  sm: 'space-y-1',
+  md: 'space-y-2',
+  lg: 'space-y-3',
+};
+
+interface SharedListProps {
+  listArray?: ListItem[];
   listClassName?: string;
+  size?: ListSize;
+  spacing?: ListSpacing;
 }
-export type UnOrderListProps = ComponentPropsWithRef<'ul'> & iUnOrderListProps;
+
+export type OrderListProps = ComponentPropsWithRef<'ol'> & SharedListProps;
+export type UnOrderListProps = ComponentPropsWithRef<'ul'> & SharedListProps;
 
 export const OrderList = forwardRef<HTMLOListElement, OrderListProps>(
-  ({ listArray, listClassName, ...props }, ref) => {
+  ({ listArray, listClassName, size = 'md', spacing = 'sm', ...props }, ref) => {
     return (
       <ol
         className={cn(
-          'max-w-md space-y-1 list-decimal list-inside',
+          'max-w-md list-decimal list-inside',
+          SPACING_CLASSES[spacing],
+          SIZE_CLASSES[size],
           listClassName
         )}
         ref={ref}
@@ -41,12 +57,16 @@ export const OrderList = forwardRef<HTMLOListElement, OrderListProps>(
   }
 );
 
+OrderList.displayName = 'OrderList';
+
 export const UnOrderList = forwardRef<HTMLUListElement, UnOrderListProps>(
-  ({ listArray, listClassName, ...props }, ref) => {
+  ({ listArray, listClassName, size = 'md', spacing = 'sm', ...props }, ref) => {
     return (
       <ul
         className={cn(
-          'max-w-md space-y-1 list-disc list-inside',
+          'max-w-md list-disc list-inside',
+          SPACING_CLASSES[spacing],
+          SIZE_CLASSES[size],
           listClassName
         )}
         ref={ref}
@@ -62,11 +82,18 @@ export const UnOrderList = forwardRef<HTMLUListElement, UnOrderListProps>(
   }
 );
 
+UnOrderList.displayName = 'UnOrderList';
+
 export const IconUnOrderList = forwardRef<HTMLUListElement, UnOrderListProps>(
-  ({ listArray, listClassName, ...props }, ref) => {
+  ({ listArray, listClassName, size = 'md', spacing = 'sm', ...props }, ref) => {
     return (
       <ul
-        className={cn('max-w-md space-y-1 list-inside', listClassName)}
+        className={cn(
+          'max-w-md list-inside',
+          SPACING_CLASSES[spacing],
+          SIZE_CLASSES[size],
+          listClassName
+        )}
         ref={ref}
         {...props}
       >
@@ -83,3 +110,5 @@ export const IconUnOrderList = forwardRef<HTMLUListElement, UnOrderListProps>(
     );
   }
 );
+
+IconUnOrderList.displayName = 'IconUnOrderList';

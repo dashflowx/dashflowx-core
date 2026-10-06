@@ -9,61 +9,63 @@ const meta: Meta<typeof Toaster> = {
     layout: 'centered',
   },
   argTypes: {
-    title: {
-      control: 'text',
-      description: 'Toast title',
-    },
-    description: {
-      control: 'text',
-      description: 'Toast description',
-    },
+    title: { control: 'text' },
+    description: { control: 'text' },
     variant: {
       control: 'select',
       options: ['default', 'destructive', 'success', 'warning', 'info'],
-      description: 'Toast variant',
     },
     size: {
       control: 'select',
       options: ['sm', 'md', 'lg'],
-      description: 'Button size',
     },
-    duration: {
-      control: 'number',
-      description: 'Auto-dismiss duration in milliseconds',
+    position: {
+      control: 'select',
+      options: [
+        'top-left',
+        'top-center',
+        'top-right',
+        'bottom-left',
+        'bottom-center',
+        'bottom-right',
+      ],
     },
-    autoDismiss: {
-      control: 'boolean',
-      description: 'Whether to auto-dismiss the toast',
-    },
-    showToaster: {
-      control: 'boolean',
-      description: 'Whether to show the toaster component',
-    },
-    maxToasts: {
-      control: 'number',
-      description: 'Maximum number of toasts to show',
-    },
-    expand: {
-      control: 'boolean',
-      description: 'Whether to expand toasts',
-    },
-    richColors: {
-      control: 'boolean',
-      description: 'Whether to use rich colors',
-    },
-    closeButton: {
-      control: 'boolean',
-      description: 'Whether to show close button',
-    },
+    duration: { control: 'number' },
+    autoDismiss: { control: 'boolean' },
+    showToaster: { control: 'boolean' },
+    maxToasts: { control: 'number' },
+    closeButton: { control: 'boolean' },
     bgColor: {
       control: 'select',
-      options: ['white', 'gray', 'red', 'green', 'blue', 'yellow', 'purple', 'pink', 'indigo', 'teal', 'orange', 'cyan', 'lime', 'emerald', 'violet', 'fuchsia', 'rose', 'sky', 'amber', 'stone', 'neutral', 'zinc', 'slate'],
-      description: 'Background color for the toaster',
+      options: [
+        'white',
+        'gray',
+        'red',
+        'green',
+        'blue',
+        'yellow',
+        'purple',
+        'pink',
+        'indigo',
+        'teal',
+        'orange',
+        'cyan',
+        'lime',
+        'emerald',
+        'violet',
+        'fuchsia',
+        'rose',
+        'sky',
+        'amber',
+        'stone',
+        'neutral',
+        'zinc',
+        'slate',
+      ],
     },
     bgIntensity: {
       control: 'select',
       options: ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'],
-      description: 'Background color intensity',
     },
   },
 };
@@ -78,7 +80,8 @@ export const Basic: Story = {
     description: 'This is a basic toaster example.',
     variant: 'default',
     size: 'md',
-    children: 'Show Basic Toast',
+    position: 'bottom-right',
+    children: 'Add to calendar',
   },
 };
 
@@ -88,37 +91,27 @@ export const Success: Story = {
     description: 'Your action was completed successfully.',
     variant: 'success',
     size: 'md',
-    children: 'Show Success Toast',
+    children: 'Show success',
   },
 };
 
-export const Error: Story = {
+export const Destructive: Story = {
   args: {
     title: 'Error!',
-    description: 'Something went wrong. Please try again.',
+    description: 'Something went wrong.',
     variant: 'destructive',
     size: 'md',
-    children: 'Show Error Toast',
+    children: 'Show error',
   },
 };
 
-export const Warning: Story = {
+export const TopRight: Story = {
   args: {
-    title: 'Warning!',
-    description: 'Please check your input before proceeding.',
-    variant: 'warning',
-    size: 'md',
-    children: 'Show Warning Toast',
-  },
-};
-
-export const Info: Story = {
-  args: {
-    title: 'Information',
-    description: 'Here is some useful information for you.',
+    title: 'Top right',
+    description: 'position="top-right"',
     variant: 'info',
-    size: 'md',
-    children: 'Show Info Toast',
+    position: 'top-right',
+    children: 'Show top-right',
   },
 };
 
@@ -127,148 +120,30 @@ export const WithAction: Story = {
     title: 'Scheduled: Catch up',
     description: 'Friday, February 10, 2023 at 5:57 PM',
     variant: 'default',
-    size: 'md',
     action: {
       label: 'Undo',
-      onClick: () => console.log('Undo clicked'),
-      variant: 'default',
+      onClick: () => undefined,
     },
-    children: 'Show Action Toast',
+    children: 'Show with action',
   },
 };
 
-export const SmallSize: Story = {
+export const NoCloseButton: Story = {
   args: {
-    title: 'Small Toast',
-    description: 'This is a small toast.',
-    variant: 'default',
-    size: 'sm',
-    children: 'Show Small Toast',
-  },
-};
-
-export const LargeSize: Story = {
-  args: {
-    title: 'Large Toast',
-    description: 'This is a large toast with more content.',
-    variant: 'default',
-    size: 'lg',
-    children: 'Show Large Toast',
-  },
-};
-
-export const LongDuration: Story = {
-  args: {
-    title: 'Long Duration',
-    description: 'This toast will stay for 10 seconds.',
-    variant: 'info',
-    size: 'md',
-    duration: 10000,
-    children: 'Show Long Duration Toast',
-  },
-};
-
-export const NoAutoDismiss: Story = {
-  args: {
-    title: 'Persistent Toast',
-    description: 'This toast will not auto-dismiss.',
+    title: 'No close',
+    description: 'closeButton={false}',
     variant: 'warning',
-    size: 'md',
-    autoDismiss: false,
-    children: 'Show Persistent Toast',
+    closeButton: false,
+    children: 'Show without close',
   },
 };
 
-export const WithoutToaster: Story = {
+export const PurpleSurface: Story = {
   args: {
-    title: 'Without Toaster',
-    description: 'This example shows the button without the toaster component.',
-    variant: 'default',
-    size: 'md',
-    showToaster: false,
-    children: 'Show Toast (No Toaster)',
-  },
-};
-
-export const CustomStyling: Story = {
-  args: {
-    title: 'Custom Styled',
-    description: 'This toaster has custom styling.',
-    variant: 'default',
-    size: 'md',
-    className: 'border-2 border-purple-300 bg-purple-50 text-purple-800',
-    children: 'Show Custom Styled Toast',
-  },
-};
-
-export const PurpleBackground: Story = {
-  args: {
-    title: 'Purple Toaster',
-    description: 'This toaster has a purple background.',
-    variant: 'default',
-    size: 'md',
+    title: 'Purple',
+    description: 'bgColor="purple"',
     bgColor: 'purple',
     bgIntensity: '50',
-    children: 'Show Purple Toaster',
-  },
-};
-
-export const TealBackground: Story = {
-  args: {
-    title: 'Teal Toaster',
-    description: 'This toaster has a teal background.',
-    variant: 'default',
-    size: 'md',
-    bgColor: 'teal',
-    bgIntensity: '100',
-    children: 'Show Teal Toaster',
-  },
-};
-
-export const OrangeBackground: Story = {
-  args: {
-    title: 'Orange Toaster',
-    description: 'This toaster has an orange background.',
-    variant: 'default',
-    size: 'md',
-    bgColor: 'orange',
-    bgIntensity: '200',
-    children: 'Show Orange Toaster',
-  },
-};
-
-export const PinkBackground: Story = {
-  args: {
-    title: 'Pink Toaster',
-    description: 'This toaster has a pink background.',
-    variant: 'default',
-    size: 'md',
-    bgColor: 'pink',
-    bgIntensity: '50',
-    children: 'Show Pink Toaster',
-  },
-};
-
-export const IndigoBackground: Story = {
-  args: {
-    title: 'Indigo Toaster',
-    description: 'This toaster has an indigo background.',
-    variant: 'default',
-    size: 'md',
-    bgColor: 'indigo',
-    bgIntensity: '100',
-    children: 'Show Indigo Toaster',
-  },
-};
-
-export const EmeraldBackground: Story = {
-  args: {
-    title: 'Emerald Toaster',
-    description: 'This toaster has an emerald background.',
-    variant: 'default',
-    size: 'md',
-    bgColor: 'emerald',
-    bgIntensity: '200',
-    children: 'Show Emerald Toaster',
+    children: 'Show purple',
   },
 };

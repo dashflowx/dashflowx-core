@@ -117,6 +117,7 @@ jobs:
           set -euo pipefail
           umask 077
           cat > "$RUNNER_TEMP/npmjs.npmrc" <<EOF
+          @dashflowx:registry=https://registry.npmjs.org/
           //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
           registry=https://registry.npmjs.org/
           always-auth=true
@@ -124,8 +125,9 @@ jobs:
           NPM_CONFIG_USERCONFIG="$RUNNER_TEMP/npmjs.npmrc" \
             node scripts/ensure-publish-version.mjs . https://registry.npmjs.org
           VER="$(node -p "require('./package.json').version")"
-          echo "Publishing @dashflowx/core@${VER} to https://registry.npmjs.org (creates the package if it does not exist)"
-          npm publish --userconfig "$RUNNER_TEMP/npmjs.npmrc" --access public --tag "${{ inputs.dist_tag }}" --ignore-scripts --provenance
+          echo "Publishing @dashflowx/core@${VER} to https://registry.npmjs.org"
+          NPM_CONFIG_USERCONFIG="$RUNNER_TEMP/npmjs.npmrc" \
+            node scripts/publish-npmjs.mjs "${{ inputs.dist_tag }}"
 
       - name: Require GitHub Packages auth for Pro
         if: steps.flags.outputs.do_pro == 'true'
@@ -152,8 +154,8 @@ jobs:
           npm publish --userconfig "$RUNNER_TEMP/github.npmrc" --ignore-scripts
 
       - name: Verify free package on npmjs
-        if: steps.flags.outputs.do_free == 'true'
-        run: npm view @dashflowx/core version
+        if: ${{ success() && steps.flags.outputs.do_free == 'true' }}
+        run: npm view @dashflowx/core version --registry https://registry.npmjs.org
 
       - name: Confirm Pro is not on public npmjs
         if: steps.flags.outputs.do_pro == 'true'

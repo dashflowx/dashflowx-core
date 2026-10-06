@@ -5,62 +5,107 @@ const meta: Meta<typeof TextArea> = {
   title: 'Element/TextArea',
   component: TextArea,
   tags: ['autodocs'],
+  parameters: { layout: 'padded' },
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['default', 'filled', 'outline', 'ghost', 'underline'],
+    },
+    size: {
+      control: 'select',
+      options: ['sm', 'md', 'lg'],
+    },
+    resize: {
+      control: 'select',
+      options: ['none', 'vertical', 'both', 'horizontal'],
+    },
+  },
 };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Text: Story = {
+export const Default: Story = {
   args: {
-    placeholder: 'Insert text here',
-    lable: 'Text Area',
+    lable: 'Notes',
+    placeholder: 'Write a note',
+    variant: 'default',
+    size: 'md',
+    rows: 3,
   },
 };
 
-export const PrefixElementTextArea: Story = {
-  args: {
-    placeholder: 'Insert text here',
-    prefixElement: (
-      <svg
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
-        viewBox="0 0 18 20"
-      >
-        <path d="M16 0H4a2 2 0 0 0-2 2v1H1a1 1 0 0 0 0 2h1v2H1a1 1 0 0 0 0 2h1v2H1a1 1 0 0 0 0 2h1v2H1a1 1 0 0 0 0 2h1v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5.5 4.5a3 3 0 1 1 0 6 3 3 0 0 1 0-6ZM13.929 17H7.071a.5.5 0 0 1-.5-.5 3.935 3.935 0 1 1 7.858 0 .5.5 0 0 1-.5.5Z" />
-      </svg>
-    ),
-  },
+export const Variants: Story = {
+  render: () => (
+    <div className="space-y-4">
+      {(['default', 'filled', 'outline', 'ghost', 'underline'] as const).map((variant) => (
+        <TextArea
+          key={variant}
+          variant={variant}
+          lable={variant}
+          placeholder="Write a note"
+          rows={2}
+        />
+      ))}
+    </div>
+  ),
 };
 
-export const SufixElementTextArea: Story = {
-  args: {
-    placeholder: 'Insert text here',
-    sufixElement: (
-      <svg
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
-        viewBox="0 0 18 20"
-      >
-        <path d="M16 0H4a2 2 0 0 0-2 2v1H1a1 1 0 0 0 0 2h1v2H1a1 1 0 0 0 0 2h1v2H1a1 1 0 0 0 0 2h1v2H1a1 1 0 0 0 0 2h1v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5.5 4.5a3 3 0 1 1 0 6 3 3 0 0 1 0-6ZM13.929 17H7.071a.5.5 0 0 1-.5-.5 3.935 3.935 0 1 1 7.858 0 .5.5 0 0 1-.5.5Z" />
-      </svg>
-    ),
-  },
+export const Sizes: Story = {
+  render: () => (
+    <div className="space-y-4">
+      {(['sm', 'md', 'lg'] as const).map((size) => (
+        <TextArea key={size} size={size} lable={size} placeholder="Write a note" />
+      ))}
+    </div>
+  ),
 };
 
-export const ErrorText: Story = {
+export const Resize: Story = {
+  render: () => (
+    <div className="space-y-4">
+      {(['none', 'vertical', 'both', 'horizontal'] as const).map((resize) => (
+        <TextArea
+          key={resize}
+          resize={resize}
+          lable={resize}
+          placeholder="Drag the corner"
+          rows={2}
+        />
+      ))}
+    </div>
+  ),
+};
+
+export const Error: Story = {
   args: {
-    placeholder: 'Insert text here',
+    lable: 'Notes',
+    placeholder: 'Write a note',
     errorMsg: 'Oh, snapp! Some error message.',
   },
 };
 
-export const SucessText: Story = {
+export const Success: Story = {
   args: {
-    placeholder: 'Insert text here',
+    lable: 'Notes',
+    placeholder: 'Write a note',
     sucessMsg: 'Well done! Some success message.',
-    lable: 'email',
     required: true,
+  },
+};
+
+export const FormMode: Story = {
+  args: {
+    formMode: true,
+    placeholder: 'Bare textarea for FormControl',
+    rows: 4,
+  },
+};
+
+export const FullWidth: Story = {
+  args: {
+    lable: 'Message',
+    placeholder: 'Write a message',
+    fullwidth: true,
   },
 };

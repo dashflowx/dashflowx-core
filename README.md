@@ -70,3 +70,10 @@ If you need help or have any questions, feel free to reach out:
 
 # Acknowledgements
 We would like to thank the open-source community for their contributions and support in making Dashflow-X a reality.
+
+## Run locally (DashFlowX)
+
+- Start: `npm install && npm test && npm run storybook` → http://localhost:6006
+- Database: **none**
+- Task prefix: **C**. Prompt: `docs/CURSOR_PROMPT.md`
+- Publish: `docs/NPM_PUBLISH.md` (ask X05). Do not laptop `npm publish`.

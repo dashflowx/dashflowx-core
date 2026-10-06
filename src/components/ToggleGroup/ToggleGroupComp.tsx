@@ -1,25 +1,41 @@
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
-import { VariantProps } from 'class-variance-authority';
+import type { VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 import { toggleVariants } from './Toggle';
 
-const ToggleGroupContext = React.createContext<
-  VariantProps<typeof toggleVariants>
->({
-  size: 'default',
+export type ToggleGroupOrientation = 'horizontal' | 'vertical';
+
+const ToggleGroupContext = React.createContext<VariantProps<typeof toggleVariants>>({
+  size: 'md',
   variant: 'default',
 });
 
+export type ToggleGroupCompProps = React.ComponentPropsWithoutRef<
+  typeof ToggleGroupPrimitive.Root
+> &
+  VariantProps<typeof toggleVariants> & {
+    orientation?: ToggleGroupOrientation;
+  };
+
+const ORIENTATION_CLASSES: Record<ToggleGroupOrientation, string> = {
+  horizontal: 'flex-row items-center',
+  vertical: 'flex-col items-stretch',
+};
+
 const ToggleGroupComp = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> &
-    VariantProps<typeof toggleVariants>
->(({ className, variant, size, children, ...props }, ref) => (
+  ToggleGroupCompProps
+>(({ className, variant = 'default', size = 'md', orientation = 'horizontal', children, ...props }, ref) => (
   <ToggleGroupPrimitive.Root
     ref={ref}
-    className={cn('flex items-center justify-center gap-1', className)}
+    orientation={orientation}
+    className={cn(
+      'flex justify-center gap-1',
+      ORIENTATION_CLASSES[orientation],
+      className
+    )}
     {...props}
   >
     <ToggleGroupContext.Provider value={{ variant, size }}>
@@ -30,10 +46,14 @@ const ToggleGroupComp = React.forwardRef<
 
 ToggleGroupComp.displayName = ToggleGroupPrimitive.Root.displayName;
 
+export type ToggleGroupItemProps = React.ComponentPropsWithoutRef<
+  typeof ToggleGroupPrimitive.Item
+> &
+  VariantProps<typeof toggleVariants>;
+
 const ToggleGroupItem = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> &
-    VariantProps<typeof toggleVariants>
+  ToggleGroupItemProps
 >(({ className, children, variant, size, ...props }, ref) => {
   const context = React.useContext(ToggleGroupContext);
 
@@ -42,8 +62,8 @@ const ToggleGroupItem = React.forwardRef<
       ref={ref}
       className={cn(
         toggleVariants({
-          variant: context.variant || variant,
-          size: context.size || size,
+          variant: variant ?? context.variant,
+          size: size ?? context.size,
         }),
         className
       )}
@@ -56,4 +76,8 @@ const ToggleGroupItem = React.forwardRef<
 
 ToggleGroupItem.displayName = ToggleGroupPrimitive.Item.displayName;
 
-export { ToggleGroupComp, ToggleGroupItem };
+export {
+  ToggleGroupComp,
+  ToggleGroupItem,
+  ORIENTATION_CLASSES as TOGGLE_GROUP_ORIENTATION_CLASSES,
+};

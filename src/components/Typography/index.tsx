@@ -1,137 +1,115 @@
-import { ComponentPropsWithRef, forwardRef } from 'react';
-import { TypographyComp } from './TypographyComp';
+import { type ComponentPropsWithRef, type ReactNode, forwardRef } from 'react';
+import {
+  TypographyComp,
+  type TypographyAlign,
+  type TypographyEmphasis,
+  type TypographySize,
+  type TypographyTone,
+  type TypographyWeight,
+} from './TypographyComp';
 
-interface iDHeroOneProps {
-  size?: 'base' | 'sm' | 'lg' | 'xl' | '2xl' | '3xl' | null;
-  weight?: 'bold' | 'thin' | 'normal' | 'medium' | 'semibold' | 'black' | null;
-  align?: 'center' | 'left' | 'right' | null;
+export type TypographyVariant = 'one' | 'two' | 'three' | 'four' | 'five' | 'six' | 'para';
+
+export type {
+  TypographyAlign,
+  TypographyEmphasis,
+  TypographySize,
+  TypographyTone,
+  TypographyWeight,
+};
+
+const VARIANT_AS: Record<TypographyVariant, 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p'> = {
+  one: 'h1',
+  two: 'h2',
+  three: 'h3',
+  four: 'h4',
+  five: 'h5',
+  six: 'h6',
+  para: 'p',
+};
+
+/** Default size per semantic variant when `size` is omitted. */
+const VARIANT_DEFAULT_SIZE: Record<TypographyVariant, TypographySize> = {
+  one: '3xl',
+  two: '2xl',
+  three: 'xl',
+  four: 'lg',
+  five: 'base',
+  six: 'sm',
+  para: 'base',
+};
+
+/** Default weight per semantic variant when `weight` is omitted. */
+const VARIANT_DEFAULT_WEIGHT: Record<TypographyVariant, TypographyWeight> = {
+  one: 'bold',
+  two: 'semibold',
+  three: 'semibold',
+  four: 'medium',
+  five: 'medium',
+  six: 'medium',
+  para: 'normal',
+};
+
+export interface iTypography {
+  variant?: TypographyVariant;
+  size?: TypographySize | null;
+  weight?: TypographyWeight | null;
+  align?: TypographyAlign | null;
   italic?: boolean | null;
   underline?: boolean;
-  emphasis?: 'low' | null;
-  variant?: string;
+  emphasis?: TypographyEmphasis | null;
+  tone?: TypographyTone;
+  className?: string;
+  children?: ReactNode;
 }
 
-export type HeroOneProps = ComponentPropsWithRef<'div'> & iDHeroOneProps;
+/** @deprecated Prefer `iTypography`. Kept for existing `HeroOneProps` imports. */
+export type HeroOneProps = ComponentPropsWithRef<'div'> & iTypography;
 
-const Typography = forwardRef<HTMLDivElement, HeroOneProps>(
+export type TypographyProps = HeroOneProps;
+
+const Typography = forwardRef<HTMLDivElement, TypographyProps>(
   (
     {
-      align,
+      align = 'left',
       size,
       emphasis,
-      italic,
-      underline,
+      italic = false,
+      underline = false,
       weight,
       className,
-      variant,
+      variant = 'para',
+      tone = 'default',
       children,
       ...props
     },
     ref
   ) => {
+    const resolvedVariant = variant in VARIANT_AS ? variant : 'para';
+    const as = VARIANT_AS[resolvedVariant];
+    const resolvedSize = size ?? VARIANT_DEFAULT_SIZE[resolvedVariant];
+    const resolvedWeight = weight ?? VARIANT_DEFAULT_WEIGHT[resolvedVariant];
+
     return (
-      <div ref={ref} {...props}>
-        {variant === 'one' && (
-          <TypographyComp
-            as="h1"
-            className={className}
-            size={size}
-            weight={weight}
-            align={align}
-            italic={italic}
-            underline={underline}
-            emphasis={emphasis}
-          >
-            {children}
-          </TypographyComp>
-        )}
-        {variant === 'two' && (
-          <TypographyComp
-            as="h2"
-            className={className}
-            size={size}
-            weight={weight}
-            align={align}
-            italic={italic}
-            underline={underline}
-            emphasis={emphasis}
-          >
-            {children}
-          </TypographyComp>
-        )}
-        {variant === 'three' && (
-          <TypographyComp
-            as="h3"
-            className={className}
-            size={size}
-            weight={weight}
-            align={align}
-            italic={italic}
-            underline={underline}
-            emphasis={emphasis}
-          >
-            {children}
-          </TypographyComp>
-        )}
-        {variant === 'four' && (
-          <TypographyComp
-            as="h4"
-            className={className}
-            size={size}
-            weight={weight}
-            align={align}
-            italic={italic}
-            underline={underline}
-            emphasis={emphasis}
-          >
-            {children}
-          </TypographyComp>
-        )}
-        {variant === 'five' && (
-          <TypographyComp
-            as="h5"
-            className={className}
-            size={size}
-            weight={weight}
-            align={align}
-            italic={italic}
-            underline={underline}
-            emphasis={emphasis}
-          >
-            {children}
-          </TypographyComp>
-        )}
-        {variant === 'six' && (
-          <TypographyComp
-            as="h6"
-            className={className}
-            size={size}
-            weight={weight}
-            align={align}
-            italic={italic}
-            underline={underline}
-            emphasis={emphasis}
-          >
-            {children}
-          </TypographyComp>
-        )}
-        {variant === 'para' && (
-          <TypographyComp
-            as="p"
-            className={className}
-            size={size}
-            weight={weight}
-            align={align}
-            italic={italic}
-            underline={underline}
-            emphasis={emphasis}
-          >
-            {children}
-          </TypographyComp>
-        )}
+      <div ref={ref} className="w-full" {...props}>
+        <TypographyComp
+          as={as}
+          className={className}
+          size={resolvedSize}
+          weight={resolvedWeight}
+          align={align ?? 'left'}
+          italic={Boolean(italic)}
+          underline={Boolean(underline)}
+          emphasis={emphasis}
+          tone={tone}
+        >
+          {children}
+        </TypographyComp>
       </div>
     );
   }
 );
 
-export { Typography, TypographyComp };
+Typography.displayName = 'Typography';
+
+export { Typography, TypographyComp, VARIANT_AS as TYPOGRAPHY_VARIANT_AS };

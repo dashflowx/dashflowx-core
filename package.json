@@ -21,13 +21,14 @@
   },
   "types": "dist/index.es.d.ts",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && vite build --config vite.pro.config.ts",
     "build:pro": "vite build --config vite.pro.config.ts",
-    "test": "node scripts/check-registry.mjs && node scripts/check-pro-boundary.mjs && node scripts/check-tier.mjs",
+    "test": "node scripts/check-registry.mjs && node scripts/check-pro-boundary.mjs && node scripts/check-tier.mjs && node scripts/check-table-deprecation.mjs",
     "pack:inspect": "node scripts/pack-inspect.mjs . && node scripts/pack-inspect.mjs core-pro",
     "lint": "eslint src/registry.ts src/components/index.tsx src/pro/index.ts --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:all": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",

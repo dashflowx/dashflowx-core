@@ -8,42 +8,57 @@ const meta: Meta<typeof Toast> = {
   parameters: {
     layout: 'centered',
   },
+  decorators: [
+    (Story) => (
+      <ToastProviderWrapper>
+        <Story />
+      </ToastProviderWrapper>
+    ),
+  ],
   argTypes: {
-    title: {
-      control: 'text',
-      description: 'Toast title',
-    },
-    description: {
-      control: 'text',
-      description: 'Toast description',
-    },
+    title: { control: 'text' },
+    description: { control: 'text' },
     variant: {
       control: 'select',
       options: ['default', 'destructive', 'success', 'warning', 'info'],
-      description: 'Toast variant',
     },
     size: {
       control: 'select',
       options: ['sm', 'md', 'lg'],
-      description: 'Toast size',
     },
-    duration: {
-      control: 'number',
-      description: 'Auto-dismiss duration in milliseconds',
-    },
-    autoDismiss: {
-      control: 'boolean',
-      description: 'Whether to auto-dismiss the toast',
-    },
+    duration: { control: 'number' },
+    autoDismiss: { control: 'boolean' },
     bgColor: {
       control: 'select',
-      options: ['white', 'gray', 'red', 'green', 'blue', 'yellow', 'purple', 'pink', 'indigo', 'teal', 'orange', 'cyan', 'lime', 'emerald', 'violet', 'fuchsia', 'rose', 'sky', 'amber', 'stone', 'neutral', 'zinc', 'slate'],
-      description: 'Background color for the toast',
+      options: [
+        'white',
+        'gray',
+        'red',
+        'green',
+        'blue',
+        'yellow',
+        'purple',
+        'pink',
+        'indigo',
+        'teal',
+        'orange',
+        'cyan',
+        'lime',
+        'emerald',
+        'violet',
+        'fuchsia',
+        'rose',
+        'sky',
+        'amber',
+        'stone',
+        'neutral',
+        'zinc',
+        'slate',
+      ],
     },
     bgIntensity: {
       control: 'select',
       options: ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'],
-      description: 'Background color intensity',
     },
   },
 };
@@ -60,11 +75,6 @@ export const Basic: Story = {
     size: 'md',
     children: 'Show Basic Toast',
   },
-  render: (args) => (
-    <ToastProviderWrapper>
-      <Toast {...args} />
-    </ToastProviderWrapper>
-  ),
 };
 
 export const Success: Story = {
@@ -75,14 +85,9 @@ export const Success: Story = {
     size: 'md',
     children: 'Show Success Toast',
   },
-  render: (args) => (
-    <ToastProviderWrapper>
-      <Toast {...args} />
-    </ToastProviderWrapper>
-  ),
 };
 
-export const Error: Story = {
+export const Destructive: Story = {
   args: {
     title: 'Error!',
     description: 'Something went wrong. Please try again.',
@@ -90,11 +95,6 @@ export const Error: Story = {
     size: 'md',
     children: 'Show Error Toast',
   },
-  render: (args) => (
-    <ToastProviderWrapper>
-      <Toast {...args} />
-    </ToastProviderWrapper>
-  ),
 };
 
 export const Warning: Story = {
@@ -105,11 +105,6 @@ export const Warning: Story = {
     size: 'md',
     children: 'Show Warning Toast',
   },
-  render: (args) => (
-    <ToastProviderWrapper>
-      <Toast {...args} />
-    </ToastProviderWrapper>
-  ),
 };
 
 export const Info: Story = {
@@ -120,11 +115,6 @@ export const Info: Story = {
     size: 'md',
     children: 'Show Info Toast',
   },
-  render: (args) => (
-    <ToastProviderWrapper>
-      <Toast {...args} />
-    </ToastProviderWrapper>
-  ),
 };
 
 export const WithAction: Story = {
@@ -135,16 +125,11 @@ export const WithAction: Story = {
     size: 'md',
     action: {
       label: 'Undo',
-      onClick: () => console.log('Undo clicked'),
+      onClick: () => undefined,
       variant: 'default',
     },
     children: 'Show Action Toast',
   },
-  render: (args) => (
-    <ToastProviderWrapper>
-      <Toast {...args} />
-    </ToastProviderWrapper>
-  ),
 };
 
 export const SmallSize: Story = {
@@ -155,11 +140,6 @@ export const SmallSize: Story = {
     size: 'sm',
     children: 'Show Small Toast',
   },
-  render: (args) => (
-    <ToastProviderWrapper>
-      <Toast {...args} />
-    </ToastProviderWrapper>
-  ),
 };
 
 export const LargeSize: Story = {
@@ -170,11 +150,6 @@ export const LargeSize: Story = {
     size: 'lg',
     children: 'Show Large Toast',
   },
-  render: (args) => (
-    <ToastProviderWrapper>
-      <Toast {...args} />
-    </ToastProviderWrapper>
-  ),
 };
 
 export const LongDuration: Story = {
@@ -199,24 +174,6 @@ export const NoAutoDismiss: Story = {
   },
 };
 
-
-
-export const CustomStyling: Story = {
-  args: {
-    title: 'Custom Styled',
-    description: 'This toast has custom styling.',
-    variant: 'default',
-    size: 'md',
-    className: 'border-2 border-purple-300 bg-purple-50 text-purple-800',
-    children: 'Show Custom Styled Toast',
-  },
-  render: (args) => (
-    <ToastProviderWrapper>
-      <Toast {...args} />
-    </ToastProviderWrapper>
-  ),
-};
-
 export const PurpleBackground: Story = {
   args: {
     title: 'Purple Toast',
@@ -227,11 +184,6 @@ export const PurpleBackground: Story = {
     bgIntensity: '50',
     children: 'Show Purple Toast',
   },
-  render: (args) => (
-    <ToastProviderWrapper>
-      <Toast {...args} />
-    </ToastProviderWrapper>
-  ),
 };
 
 export const TealBackground: Story = {
@@ -244,43 +196,4 @@ export const TealBackground: Story = {
     bgIntensity: '100',
     children: 'Show Teal Toast',
   },
-  render: (args) => (
-    <ToastProviderWrapper>
-      <Toast {...args} />
-    </ToastProviderWrapper>
-  ),
-};
-
-export const OrangeBackground: Story = {
-  args: {
-    title: 'Orange Toast',
-    description: 'This toast has an orange background.',
-    variant: 'default',
-    size: 'md',
-    bgColor: 'orange',
-    bgIntensity: '200',
-    children: 'Show Orange Toast',
-  },
-  render: (args) => (
-    <ToastProviderWrapper>
-      <Toast {...args} />
-    </ToastProviderWrapper>
-  ),
-};
-
-export const PinkBackground: Story = {
-  args: {
-    title: 'Pink Toast',
-    description: 'This toast has a pink background.',
-    variant: 'default',
-    size: 'md',
-    bgColor: 'pink',
-    bgIntensity: '50',
-    children: 'Show Pink Toast',
-  },
-  render: (args) => (
-    <ToastProviderWrapper>
-      <Toast {...args} />
-    </ToastProviderWrapper>
-  ),
 };

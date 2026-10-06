@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+- `table`, `tr`, `th`, and `td` are **deprecated**. New apps should import them from `@dashflowx/datagrid` (G02). Core still re-exports the same names so existing `import { table } from '@dashflowx/core'` compiles.
+
 ## 3.0.0 — 2026-09-21
 
 Breaking: Pro components are no longer in the public `@dashflowx/core` tarball. Follows public **2.0.127**. **1.0.0** already exists on npmjs and cannot be republished.

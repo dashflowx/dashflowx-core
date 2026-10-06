@@ -1,11 +1,9 @@
-import { cn } from "@/lib/utils";
-
-export const a = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLAnchorElement>) => (
-  <a
-    className={cn('font-medium underline underline-offset-4', className)}
-    {...props}
-  />
-)
+/** @deprecated Import from `./Anchor`. Re-export for existing `./a` paths. */
+export { Anchor, a } from '../Anchor';
+export type {
+  AnchorProps,
+  AnchorSize,
+  AnchorUnderline,
+  AnchorVariant,
+  AnchorWeight,
+} from '../Anchor';

@@ -1,135 +1,136 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 import { useToast } from '@/lib/use-toast';
-import { Button } from '../Button';
-import { ToastAction } from '../Toast';
-import { ToasterComp } from './ToasterComp';
+import { Button, type ButtonVariant } from '../Button';
+import {
+  ToastAction,
+  toastSurfaceClass,
+  type ToastActionConfig,
+  type ToastBgColor,
+  type ToastBgIntensity,
+  type ToastSize,
+  type ToastVariant,
+} from '../Toast';
+import { ToasterComp, type ToasterCompProps, type ToasterPosition } from './ToasterComp';
 
-// Dynamic Toaster Props Interface
-export interface DynamicToasterProps {
-  // Content
+export type { ToasterPosition, ToasterCompProps };
+export type { ToastActionConfig, ToastBgColor, ToastBgIntensity, ToastSize, ToastVariant };
+
+/**
+ * Demo host: mounts `ToasterComp` and a trigger that enqueues via `useToast`.
+ * For app shells, prefer mounting `ToasterComp` once at the root and calling `toast()` /
+ * `<Toast />` elsewhere.
+ */
+export interface iToaster {
   title?: string;
   description?: string;
   children?: React.ReactNode;
-  
-  // Variants and styling
-  variant?: 'default' | 'destructive' | 'success' | 'warning' | 'info';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: ToastVariant;
+  size?: ToastSize;
   className?: string;
-  
-  // Background color options
-  bgColor?: 'white' | 'gray' | 'red' | 'green' | 'blue' | 'yellow' | 'purple' | 'pink' | 'indigo' | 'teal' | 'orange' | 'cyan' | 'lime' | 'emerald' | 'violet' | 'fuchsia' | 'rose' | 'sky' | 'amber' | 'stone' | 'neutral' | 'zinc' | 'slate';
-  bgIntensity?: '50' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
-  
-  // Behavior
+  bgColor?: ToastBgColor;
+  bgIntensity?: ToastBgIntensity;
   duration?: number;
   autoDismiss?: boolean;
-  
-  // Actions
-  action?: {
-    label: string;
-    onClick: () => void;
-    variant?: 'default' | 'destructive';
-  };
-  
-  // Positioning
-  position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
-  
-  // Callbacks
+  action?: ToastActionConfig;
   onOpenChange?: (open: boolean) => void;
-  
-  // Toaster specific
+  position?: ToasterPosition;
+  /** Mount the viewport host. Default true for Storybook/docs demos. */
   showToaster?: boolean;
   maxToasts?: number;
+  /** @deprecated Sonner-style prop; ignored by the Radix host. Prefer `variant`. */
   expand?: boolean;
+  /** @deprecated Sonner-style prop; ignored. Use `variant` / `bgColor`. */
   richColors?: boolean;
   closeButton?: boolean;
+  toastClassName?: string;
+  triggerClassName?: string;
+  triggerVariant?: ButtonVariant;
 }
 
-// Dynamic Toaster Component
-const Toaster = React.memo<DynamicToasterProps>(({
+/** @deprecated Prefer `iToaster`. */
+export type DynamicToasterProps = iToaster;
+
+export type ToasterProps = iToaster;
+
+const Toaster = React.memo<iToaster>(function Toaster({
   title = 'Scheduled: Catch up',
   description = 'Friday, February 10, 2023 at 5:57 PM',
   children,
   variant = 'default',
   size = 'md',
-  className = '',
+  className,
   bgColor,
   bgIntensity = '50',
   duration = 5000,
   autoDismiss = true,
   action,
   onOpenChange,
+  position = 'bottom-right',
   showToaster = true,
-}) => {
+  maxToasts = 3,
+  closeButton = true,
+  toastClassName,
+  triggerClassName,
+  triggerVariant = 'outline',
+}) {
   const { toast } = useToast();
 
   const handleToast = React.useCallback(() => {
-    // Generate background color classes if bgColor is provided
-    const bgColorClass = bgColor ? `bg-${bgColor}-${bgIntensity}` : '';
-    const textColorClass = bgColor ? `text-${bgColor}-${parseInt(bgIntensity) + 300}` : '';
-    const borderColorClass = bgColor ? `border-${bgColor}-${parseInt(bgIntensity) + 100}` : '';
-    
-    const toastConfig = {
+    const surface = toastSurfaceClass(bgColor, bgIntensity);
+    toast({
       title,
       description,
-      variant: variant as 'default' | 'destructive' | 'success' | 'warning' | 'info',
-      duration: autoDismiss ? duration : undefined,
+      variant,
+      size,
+      duration: autoDismiss ? duration : Number.POSITIVE_INFINITY,
       onOpenChange,
-      className: `${bgColorClass} ${textColorClass} ${borderColorClass}`.trim(),
+      className: cn(bgColor ? surface : undefined, toastClassName, className),
       action: action ? (
-        <ToastAction 
+        <ToastAction
           altText={action.label}
           onClick={action.onClick}
-          className={action.variant === 'destructive' ? 'text-red-600 hover:text-red-700' : ''}
+          className={
+            action.variant === 'destructive'
+              ? 'text-red-600 hover:text-red-700'
+              : undefined
+          }
         >
           {action.label}
         </ToastAction>
       ) : undefined,
-    };
-
-    toast(toastConfig);
-  }, [toast, title, description, variant, bgColor, bgIntensity, duration, autoDismiss, action, onOpenChange]);
-
-  const getVariantClasses = React.useCallback(() => {
-    switch (variant) {
-      case 'success':
-        return 'border-green-200 bg-white text-green-800 hover:bg-green-50';
-      case 'warning':
-        return 'border-yellow-200 bg-white text-yellow-800 hover:bg-yellow-50';
-      case 'info':
-        return 'border-blue-200 bg-white text-blue-800 hover:bg-blue-50';
-      case 'destructive':
-        return 'border-red-200 bg-white text-red-800 hover:bg-red-50';
-      case 'default':
-      default:
-        return 'border-gray-200 bg-white text-gray-900 hover:bg-gray-50';
-    }
-  }, [variant]);
-
-  const getSizeClasses = React.useCallback(() => {
-    switch (size) {
-      case 'sm':
-        return 'px-3 py-2 text-xs';
-      case 'lg':
-        return 'px-6 py-3 text-base';
-      case 'md':
-      default:
-        return 'px-4 py-2 text-sm';
-    }
-  }, [size]);
-
-  const variantClasses = getVariantClasses();
-  const sizeClasses = getSizeClasses();
+    });
+  }, [
+    toast,
+    title,
+    description,
+    variant,
+    size,
+    bgColor,
+    bgIntensity,
+    duration,
+    autoDismiss,
+    action,
+    onOpenChange,
+    toastClassName,
+    className,
+  ]);
 
   return (
     <div className="space-y-4">
-      {showToaster && <ToasterComp />}
+      {showToaster ? (
+        <ToasterComp
+          position={position}
+          maxToasts={maxToasts}
+          closeButton={closeButton}
+        />
+      ) : null}
       <Button
-        variant="outline"
+        variant={triggerVariant}
         onClick={handleToast}
-        className={`${variantClasses} ${sizeClasses} ${className}`}
+        className={triggerClassName}
       >
         {children || 'Add to calendar'}
       </Button>

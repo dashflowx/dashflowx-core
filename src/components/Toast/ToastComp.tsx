@@ -23,32 +23,41 @@ const ToastViewport = React.forwardRef<
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName;
 
 const toastVariants = cva(
-  'group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full',
+  'group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full',
   {
     variants: {
       variant: {
-        default: 'border bg-white text-gray-900',
+        default: 'border-gray-200 bg-white text-gray-900',
         destructive: 'border-red-200 bg-red-50 text-red-800',
         success: 'border-green-200 bg-green-50 text-green-800',
         warning: 'border-yellow-200 bg-yellow-50 text-yellow-800',
         info: 'border-blue-200 bg-blue-50 text-blue-800',
       },
+      size: {
+        sm: 'p-3 pr-6 text-xs space-x-2',
+        md: 'p-6 pr-8 text-sm space-x-4',
+        lg: 'p-8 pr-10 text-base space-x-5',
+      },
     },
     defaultVariants: {
       variant: 'default',
+      size: 'md',
     },
   }
 );
+
+export type ToastVariant = NonNullable<VariantProps<typeof toastVariants>['variant']>;
+export type ToastSize = NonNullable<VariantProps<typeof toastVariants>['size']>;
 
 const ToastComp = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
     VariantProps<typeof toastVariants>
->(({ className, variant, ...props }, ref) => {
+>(({ className, variant, size, ...props }, ref) => {
   return (
     <ToastPrimitives.Root
       ref={ref}
-      className={cn(toastVariants({ variant }), className)}
+      className={cn(toastVariants({ variant, size }), className)}
       {...props}
     />
   );
@@ -112,6 +121,7 @@ const ToastDescription = React.forwardRef<
 ));
 ToastDescription.displayName = ToastPrimitives.Description.displayName;
 
+/** Radix toast root props (variant, size, open, duration, …). */
 type ToastProps = React.ComponentPropsWithoutRef<typeof ToastComp>;
 
 type ToastActionElement = React.ReactElement<typeof ToastAction>;
@@ -124,6 +134,7 @@ export {
   ToastProvider,
   ToastTitle,
   ToastViewport,
+  toastVariants,
   type ToastActionElement,
   type ToastProps,
 };
