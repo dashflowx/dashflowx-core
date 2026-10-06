@@ -169,8 +169,9 @@ PopoverComp.displayName = 'PopoverComp';
 export const PopoverContent = ({
   children,
   className,
+  align: _align,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+}: React.HTMLAttributes<HTMLDivElement> & { align?: 'start' | 'center' | 'end' }) => (
   <div className={cn('w-80 rounded-md border bg-white p-4 shadow-md', className)} {...props}>
     {children}
   </div>
@@ -180,8 +181,9 @@ PopoverContent.displayName = 'PopoverContent';
 export const PopoverTrigger = ({
   children,
   className,
+  asChild: _asChild,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+}: React.HTMLAttributes<HTMLDivElement> & { asChild?: boolean }) => (
   <div className={cn('cursor-pointer', className)} {...props}>
     {children}
   </div>

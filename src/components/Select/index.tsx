@@ -33,9 +33,12 @@ export interface iSelect {
   onClose?: () => void;
 }
 
-export type SelectProps = Omit<ComponentPropsWithRef<'div'>, 'onChange'> & iSelect;
+export type SelectProps = Omit<ComponentPropsWithRef<'div'>, 'onChange' | 'value' | 'defaultValue'> & iSelect;
 
-export type SelectCompProps = Omit<ComponentPropsWithRef<'div'>, 'onChange'> & {
+export type SelectCompProps = Omit<
+  ComponentPropsWithRef<'div'>,
+  'onChange' | 'value' | 'defaultValue'
+> & {
   label?: string;
   variant?: SelectVariant;
   size?: SelectSize;

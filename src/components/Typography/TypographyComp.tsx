@@ -47,6 +47,10 @@ export const TYPOGRAPHY_TONE_CLASSES: Record<TypographyTone, string> = {
 
 export interface TypographyCompProps extends React.HTMLAttributes<HTMLElement> {
   as?: React.ElementType;
+  /** Next.js Link / anchor href when `as` is a link component. */
+  href?: string;
+  /** React Router `to` when `as` is a router Link. */
+  to?: string;
   size?: TypographySize;
   weight?: TypographyWeight;
   align?: TypographyAlign;
